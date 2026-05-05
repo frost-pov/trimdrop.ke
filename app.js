@@ -20,7 +20,7 @@
    ============================================================================= */
 
 /** Replace with your published CSV link: Sheet → Share → Publish to web → CSV */
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7o-SnNnXkzb9_xsCVbNvMi_-AGpTnsUa93E5ERc-xfs0oYXCckp0n-BiQo5eFdyW61y_U5vxqlOad/pub?gid=0&single=true&output=csv";
+const SHEET_URL = "";
 
 /** WhatsApp digits only (no +). Example is placeholder — put your business line. */
 const WA_NUMBER = "254700000000";
@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCursor();
   initTickerXray();
   initFilters();
+  initCategoryTiles();
   initModal();
   initNavOrders();
   loadInventory();
@@ -366,13 +367,36 @@ function splitCsvLine(line) {
 /* -----------------------------------------------------------------------------
    Render + filters
    --------------------------------------------------------------------------- */
+function setProductFilter(filter) {
+  const f = (filter || "All").trim() || "All";
+  currentFilter = f;
+  document.querySelectorAll(".filter-tab").forEach((b) => {
+    const tabFilter = (b.getAttribute("data-filter") || "All").trim();
+    b.classList.toggle("active", tabFilter === f);
+  });
+  applyFilter();
+}
+
 function initFilters() {
   document.querySelectorAll(".filter-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".filter-tab").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentFilter = btn.getAttribute("data-filter") || "All";
-      applyFilter();
+      setProductFilter(btn.getAttribute("data-filter"));
+    });
+  });
+}
+
+/** “Shop the drop” mosaic → #products + matching category chip */
+function initCategoryTiles() {
+  document.querySelectorAll("a.cat-item[data-filter]").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const f = link.getAttribute("data-filter");
+      if (!f) return;
+      setProductFilter(f);
+      const products = document.getElementById("products");
+      if (!products) return;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      products.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     });
   });
 }

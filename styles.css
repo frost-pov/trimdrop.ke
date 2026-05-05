@@ -38,6 +38,16 @@
   --section-y: clamp(5rem, 12vw, 10rem);
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --max: 1440px;
+
+  /*
+   * “Shop the drop” tiles — set to url("…") or url("/images/your-file.jpg").
+   * `none` keeps the gradient only. Photos get soft edge veils so they blend into the mosaic.
+   */
+  --cat-tees: none;
+  --cat-bottoms: none;
+  --cat-outerwear: none;
+  --cat-footwear: none;
+  --cat-accessories: none;
 }
 
 *,
@@ -626,18 +636,12 @@ section {
 }
 
 /* -----------------------------------------------------------------------------
-   Categories  (mosaic under “Shop the drop”)
+   Categories (mosaic under “Shop the drop”)
    ---------------------------------------------------------------------------
-   TEXT LABELS — Edit in trimdrop.html: .cat-name and .cat-count per tile.
-
-   OPTIONAL PHOTOS PER TILE — Override gradients below, e.g.:
-     .cat-1 .cat-bg {
-       background-image: url("https://yoursite.com/tees.jpg");
-       background-size: cover;
-       background-position: center;
-     }
-   Keep the ::after overlays for subtle texture, or remove those rules if photos
-   should stay clean.
+   • Labels: trimdrop.html — .cat-name / .cat-count on each tile.
+   • Links: tiles are <a> → opens #products + sets filter via app.js.
+   • Optional photos: tokens above (--cat-tees … --cat-accessories). Paths like
+       url("/images/dark_fit.jpg") work once files are deployed with the site.
    --------------------------------------------------------------------------- */
 .categories {
   background: var(--black);
@@ -660,16 +664,26 @@ section {
   margin: 0 auto;
 }
 
-.cat-item {
+a.cat-item {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: var(--grey);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+  outline-offset: 2px;
 }
 
-.cat-item:first-child {
+a.cat-item:first-child {
   grid-row: span 2;
   aspect-ratio: auto;
+}
+
+a.cat-item:focus-visible {
+  z-index: 2;
+  box-shadow: inset 0 0 0 2px rgba(212, 160, 23, 0.65);
 }
 
 .cat-bg {
@@ -678,34 +692,72 @@ section {
   transition: transform 0.65s var(--ease-out);
 }
 
-.cat-item:hover .cat-bg {
+a.cat-item:hover .cat-bg,
+a.cat-item:focus-visible .cat-bg {
   transform: scale(1.04);
 }
 
+/* Layer order: blend veils → optional photo → base gradient (--cat-* may be none) */
 .cat-1 .cat-bg {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d1a1a 100%);
+  background-color: #171212;
+  background-image:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.55) 0%, rgba(8, 8, 8, 0.1) 40%, rgba(8, 8, 8, 0.55) 100%),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.45) 0%, transparent 55%),
+    var(--cat-tees),
+    linear-gradient(135deg, #1a1a1a 0%, #2d1a1a 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 .cat-2 .cat-bg {
-  background: linear-gradient(135deg, #1a1a1e 0%, #1a1a2d 100%);
+  background-color: #151518;
+  background-image:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.4) 0%, transparent 52%),
+    var(--cat-bottoms),
+    linear-gradient(135deg, #1a1a1e 0%, #1a1a2d 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 .cat-3 .cat-bg {
-  background: linear-gradient(135deg, #1a1e1a 0%, #1a2d1a 100%);
+  background-color: #141916;
+  background-image:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
+    var(--cat-outerwear),
+    linear-gradient(135deg, #1a1e1a 0%, #1a2d1a 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 .cat-4 .cat-bg {
-  background: linear-gradient(135deg, #1e1a1a 0%, #2d2a1a 100%);
+  background-color: #161412;
+  background-image:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
+    var(--cat-footwear),
+    linear-gradient(135deg, #1e1a1a 0%, #2d2a1a 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 .cat-5 .cat-bg {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 100%);
+  background-color: #151515;
+  background-image:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
+    var(--cat-accessories),
+    linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 .cat-1 .cat-bg::after {
   content: "";
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: repeating-linear-gradient(
     45deg,
     transparent,
@@ -713,13 +765,16 @@ section {
     rgba(200, 16, 46, 0.05) 20px,
     rgba(200, 16, 46, 0.05) 21px
   );
+  opacity: 0.55;
 }
 
 .cat-2 .cat-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 72%);
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(212, 160, 23, 0.07) 0%, transparent 72%);
+  opacity: 0.6;
 }
 
 .cat-info {
@@ -763,7 +818,8 @@ section {
   pointer-events: none;
 }
 
-.cat-item:hover .cat-arrow {
+a.cat-item:hover .cat-arrow,
+a.cat-item:focus-visible .cat-arrow {
   opacity: 1;
   transform: translate(0, 0);
 }
@@ -1510,7 +1566,7 @@ footer {
     grid-template-columns: 1fr 1fr;
   }
 
-  .cat-item:first-child {
+  a.cat-item:first-child {
     grid-column: span 2;
   }
 

@@ -143,9 +143,9 @@
   </article>
 </section>
 
-<!-- ========== CATEGORIES (decorative mosaic) ==========
-     IMAGES:  Optional photo per tile — see styles.css (.cat-1 … .cat-5 .cat-bg).
-     PERSONALITY: cat-name + cat-count lines (how you describe each category).
+<!-- ========== CATEGORIES (mosaic → New drops) ==========
+     CLICK: Each tile jumps to #products + selects that category filter (app.js).
+     PHOTOS: Optional — set --cat-tees … --cat-accessories in styles.css (:root).
  -->
 <section class="categories" id="categories">
   <div class="section-head">
@@ -153,46 +153,46 @@
     <h2 class="section-title">Shop the drop</h2>
   </div>
   <div class="cat-grid">
-    <div class="cat-item cat-1">
+    <a href="#products" class="cat-item cat-1" data-filter="Tees" aria-label="Open Tees and tops in New drops">
       <div class="cat-bg"></div>
       <div class="cat-arrow" aria-hidden="true">↗</div>
       <div class="cat-info">
         <div class="cat-name">Tees &amp; Tops</div>
         <div class="cat-count">New arrivals</div>
       </div>
-    </div>
-    <div class="cat-item cat-2">
+    </a>
+    <a href="#products" class="cat-item cat-2" data-filter="Bottoms" aria-label="Open Bottoms in New drops">
       <div class="cat-bg"></div>
       <div class="cat-arrow" aria-hidden="true">↗</div>
       <div class="cat-info">
         <div class="cat-name">Bottoms</div>
         <div class="cat-count">Joggers &amp; cargos</div>
       </div>
-    </div>
-    <div class="cat-item cat-3">
+    </a>
+    <a href="#products" class="cat-item cat-3" data-filter="Outerwear" aria-label="Open Outerwear in New drops">
       <div class="cat-bg"></div>
       <div class="cat-arrow" aria-hidden="true">↗</div>
       <div class="cat-info">
         <div class="cat-name">Outerwear</div>
         <div class="cat-count">Hoodies &amp; jackets</div>
       </div>
-    </div>
-    <div class="cat-item cat-4">
+    </a>
+    <a href="#products" class="cat-item cat-4" data-filter="Footwear" aria-label="Open Footwear in New drops">
       <div class="cat-bg"></div>
       <div class="cat-arrow" aria-hidden="true">↗</div>
       <div class="cat-info">
         <div class="cat-name">Footwear</div>
         <div class="cat-count">Kicks</div>
       </div>
-    </div>
-    <div class="cat-item cat-5">
+    </a>
+    <a href="#products" class="cat-item cat-5" data-filter="Accessories" aria-label="Open Accessories in New drops">
       <div class="cat-bg"></div>
       <div class="cat-arrow" aria-hidden="true">↗</div>
       <div class="cat-info">
         <div class="cat-name">Accessories</div>
         <div class="cat-count">Caps &amp; bags</div>
       </div>
-    </div>
+    </a>
   </div>
 </section>
 
