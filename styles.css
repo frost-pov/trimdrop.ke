@@ -7,8 +7,7 @@
              Use full URLs to hosted JPG/PNG/WebP (e.g. CDN, Drive direct link).
    MOOD    — Colours & type scale in the second :root block (tokens).
    LAYOUT  — Section padding via --section-y, --gutter; max width via --max.
-
-   For on-page copy (headlines, stories), edit trimdrop.html instead.
+             On-page copy lives in index.html; sheet + cart live in app.js.
    For product photos + WhatsApp wording, see app.js.
    ============================================================================= */
 
@@ -687,7 +686,7 @@ section {
 /* -----------------------------------------------------------------------------
    Categories (mosaic under “Shop the drop”)
    ---------------------------------------------------------------------------
-   • Labels: trimdrop.html — .cat-name / .cat-count on each tile.
+   • Labels: index.html — .cat-name / .cat-count on each tile.
    • Links: tiles are <a> → opens #products + sets filter via app.js.
    • Optional photos: tokens above (--cat-tees … --cat-accessories). Paths like
        url("/images/dark_fit.jpg") work once files are deployed with the site.

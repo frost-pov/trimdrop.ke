@@ -1,0 +1,18 @@
+---
+description: Explains Vercel preview 403/401 vs production; entry is index.html
+globs: "**/*.{html,json}"
+alwaysApply: false
+---
+
+# Vercel + TrimDrop
+
+## “403 Forbidden” (or 401) inside the Vercel **deployment preview** panel
+That iframe often hits a **protected preview URL** (`*-frost-povs-projects.vercel.app`). Those can return **401** and set **`X-Frame-Options: DENY`**, so the embedded preview looks blocked even when the deploy succeeded.
+
+**Test the real site** with the production domain: **`https://trimdrop-ke.vercel.app`** (or whatever you set as Production).
+
+To show previews without auth: **Project → Settings → Deployment Protection** → adjust **Vercel Authentication** / preview protection (team policy).
+
+## Static entry
+- **`index.html`** is the main page at **`/`**.
+- **`vercel.json`** rewrites **`/trimdrop.html` → `/`** for old links.

@@ -305,6 +305,17 @@ async function loadInventory() {
     if (csvText.charCodeAt(0) === 0xfeff) csvText = csvText.slice(1);
     if (!csvText.trim()) throw new Error("Empty CSV body");
 
+    const head = csvText.trimStart().slice(0, 800).toLowerCase();
+    if (
+      head.startsWith("<!doctype") ||
+      head.startsWith("<html") ||
+      (head.startsWith("<") && head.includes("<html"))
+    ) {
+      throw new Error(
+        'Sheet URL returned a web page instead of CSV. Use File → Share → Publish to web → format "CSV" — the link must include output=csv (not pubhtml).'
+      );
+    }
+
     const parsed = parseCSV(csvText).map(normalizeCsvRow).filter(isAvailableRow);
 
     if (parsed.length === 0) {
@@ -322,9 +333,13 @@ async function loadInventory() {
     applyFilter();
   } catch (e) {
     console.warn("loadInventory", e);
-    applyFallback(
-      "Could not load CSV (check publish link, CORS, or column headers) — fallback samples."
-    );
+    const msg =
+      e && String(e.message || "").includes("web page instead of CSV")
+        ? e.message + " Showing fallback samples."
+        : e && String(e.message || "").includes("HTTP")
+          ? `CSV request failed (${e.message}). Check the published link. Showing fallback samples.`
+          : "Could not load CSV (link, network, or sheet columns). Showing fallback samples.";
+    applyFallback(msg);
   }
 }
 
