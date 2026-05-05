@@ -430,6 +430,30 @@
   </div>
 </div>
 
+<div class="product-lightbox" id="productLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
+  <div class="product-lightbox-dialog">
+    <button type="button" class="product-lightbox-close" id="productLightboxClose" aria-label="Close">✕</button>
+    <div class="product-lightbox-layout">
+      <div class="product-lightbox-visual">
+        <button type="button" class="product-lightbox-like" id="lightboxLikeBtn" aria-label="Like this piece" aria-pressed="false">
+          <span class="heart" aria-hidden="true">♥</span>
+        </button>
+        <div class="product-lightbox-media" id="lightboxMediaMount"></div>
+      </div>
+      <div class="product-lightbox-meta">
+        <span class="product-lightbox-badge-slot" id="lightboxBadgeSlot"></span>
+        <h3 class="product-lightbox-title" id="lightboxTitle">TrimDrop</h3>
+        <p class="product-lightbox-price" id="lightboxPrice"></p>
+        <p class="product-lightbox-hint">Tap backdrop or ✕ to close</p>
+        <div class="product-lightbox-actions">
+          <button type="button" class="btn-primary product-lightbox-add" id="lightboxAddBtn">Add to bag</button>
+          <button type="button" class="modal-wa-btn product-lightbox-dm" id="lightboxDmBtn">DM on WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/app.js" defer></script>
 </body>
 </html>
