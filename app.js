@@ -23,7 +23,7 @@
 const SHEET_URL = "";
 
 /** WhatsApp digits only (no +). Example is placeholder — put your business line. */
-const WA_NUMBER = "254700000000";
+const WA_NUMBER = "254746881264";
 
 /**
  * How you greet customers in the WhatsApp draft — this IS your “personality” online.
