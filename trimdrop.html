@@ -51,7 +51,13 @@
     <li><a href="#how">How It Works</a></li>
     <li><a href="#delivery">Delivery</a></li>
   </ul>
-  <a href="#" class="nav-cta" id="navOrderBtn">Order Now</a>
+  <div class="nav-end">
+    <button type="button" class="nav-bag" id="cartToggleBtn" aria-label="Open shopping bag" aria-expanded="false" aria-controls="cartDrawer">
+      <span class="nav-bag-label">Bag</span>
+      <span class="nav-bag-badge" id="cartCountBadge" hidden>0</span>
+    </button>
+    <a href="#" class="nav-cta" id="navOrderBtn">Order Now</a>
+  </div>
 </nav>
 
 <!-- ========== HERO ==========
@@ -237,13 +243,13 @@
     </div>
     <div class="step">
       <div class="step-num">02</div>
-      <div class="step-title">Order</div>
-      <p class="step-desc">Tap “Order via WhatsApp” on any piece. You message us directly to confirm.</p>
+      <div class="step-title">Cart &amp; pay</div>
+      <p class="step-desc">Add pieces to your bag, pay via M-PESA (Pay Bill or Till), then send the order on WhatsApp with your confirmation code.</p>
     </div>
     <div class="step">
       <div class="step-num">03</div>
       <div class="step-title">Pay</div>
-      <p class="step-desc">Pay via M-Pesa once your order is confirmed.</p>
+      <p class="step-desc">Checkout shows Lipa Na M-PESA steps and the exact amount—then you paste the SMS code into WhatsApp.</p>
     </div>
     <div class="step">
       <div class="step-num">04</div>
@@ -356,6 +362,59 @@
     <a href="#" class="modal-wa-btn" id="modalWaContinue" target="_blank" rel="noopener">
       Continue on WhatsApp
     </a>
+  </div>
+</div>
+
+<!-- ========== CART DRAWER ========== -->
+<div class="cart-drawer-overlay" id="cartDrawerBackdrop" aria-hidden="true"></div>
+<aside class="cart-drawer" id="cartDrawer" aria-modal="true" role="dialog" aria-labelledby="cartDrawerTitle" aria-hidden="true">
+  <div class="cart-drawer-head">
+    <h2 class="cart-drawer-title" id="cartDrawerTitle">Your bag</h2>
+    <button type="button" class="modal-close cart-drawer-close" id="cartDrawerClose" aria-label="Close bag">✕</button>
+  </div>
+  <p class="cart-empty" id="cartEmpty" hidden>No items yet — add from New drops.</p>
+  <div class="cart-lines" id="cartLines"></div>
+  <div class="cart-drawer-foot">
+    <div class="cart-subtotal" id="cartSubtotal"></div>
+    <button type="button" class="btn-primary cart-checkout-btn" id="cartCheckoutBtn" disabled>Checkout &amp; pay</button>
+  </div>
+</aside>
+
+<!-- ========== M-PESA CHECKOUT ========== -->
+<div class="order-modal checkout-modal" id="checkoutModal" aria-modal="true" role="dialog" aria-labelledby="checkoutTitle" aria-hidden="true">
+  <div class="modal-box modal-box--wide">
+    <button type="button" class="modal-close" id="checkoutModalClose" aria-label="Close">✕</button>
+    <div class="mpesa-head">
+      <span class="mpesa-icon" aria-hidden="true"></span>
+      <div>
+        <div class="modal-title" id="checkoutTitle">Lipa Na M-PESA</div>
+        <div class="modal-sub">Pay on your phone, then send proof on WhatsApp</div>
+      </div>
+    </div>
+    <p class="checkout-total-pill" id="checkoutTotalStrip"></p>
+    <p class="checkout-warn" id="checkoutMpesaWarn" hidden></p>
+    <div id="checkoutMpesaSteps"></div>
+    <div class="checkout-field">
+      <label class="checkout-label" for="checkoutMpesaRef">M-PESA ID / confirmation code <span class="req">*</span></label>
+      <input type="text" class="checkout-input" id="checkoutMpesaRef" name="mpesa_ref" placeholder="e.g. QYD689GK78" autocomplete="off" required>
+    </div>
+    <div class="modal-options checkout-delivery">
+      <label class="modal-option">
+        <input type="radio" name="checkout-delivery" value="pickup" checked>
+        <div>
+          <div class="modal-option-text">Pickup Mtaani</div>
+          <div class="modal-option-sub">Collect at nearest agent</div>
+        </div>
+      </label>
+      <label class="modal-option">
+        <input type="radio" name="checkout-delivery" value="bolt">
+        <div>
+          <div class="modal-option-text">Bolt doorstep</div>
+          <div class="modal-option-sub">Delivered to you</div>
+        </div>
+      </label>
+    </div>
+    <button type="button" class="modal-wa-btn" id="checkoutWaBtn">Send order + payment proof on WhatsApp</button>
   </div>
 </div>
 

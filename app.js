@@ -19,17 +19,43 @@
    Optional: search for buildPrefill() if you want more advanced message logic.
    ============================================================================= */
 
-/** Replace with your published CSV link: Sheet → Share → Publish to web → CSV */
+/**
+ * Google Sheet — File → Share → Publish to web → pick the sheet → CSV → Publish.
+ * Paste the full link; it must include output=csv (or single=true&output=csv).
+ * Leave "" to use FALLBACK_PRODUCTS (common reason “CSV doesn’t work” on Vercel).
+ */
 const SHEET_URL = "";
 
 /** WhatsApp digits only (no +). Example is placeholder — put your business line. */
-const WA_NUMBER = "254746881264";
+const WA_NUMBER = "254700000000";
 
 /**
  * How you greet customers in the WhatsApp draft — this IS your “personality” online.
  * Tweak wording anytime; keep ${} placeholders out (this file uses plain strings).
  */
 const BRAND_NAME = "TrimDrop KE";
+
+/**
+ * M-PESA — manual Lipa Na M-PESA (customer pays on phone; sends you confirmation code).
+ * paybill = Pay Bill + business number + account | till = Buy Goods & Services + till number.
+ */
+const MPESA_PAYMENT_MODE = "paybill";
+
+/** Shown on the payment screen — override blank to use BRAND_NAME */
+const MPESA_BUSINESS_DISPLAY_NAME = "";
+
+/** Pay Bill business number — digits only (you add later) */
+const MPESA_PAYBILL_NUMBER = "";
+
+/** Pay Bill account ref the customer enters under “Account No.” */
+const MPESA_ACCOUNT_NUMBER = "";
+
+/** Till number — digits only — use when MPESA_PAYMENT_MODE is "till" */
+const MPESA_TILL_NUMBER = "";
+
+function mpesaMerchantLabel() {
+  return (MPESA_BUSINESS_DISPLAY_NAME || "").trim() || BRAND_NAME;
+}
 
 const BRAND_VOICE = {
   /** First line of the prefilled message */
@@ -96,7 +122,7 @@ const FALLBACK_PRODUCTS = [
 
 /**
  * Google Sheet header row (column names can float; parser matches by header text):
- *   name, category, price, old_price, badge, image_url, available, featured
+ *   name, category, price, old_price, badge, image_url, available, featured, sku
  *
  *   category → must match a filter chip: Tees | Bottoms | Outerwear | Footwear | Accessories
  *   badge → new | hot | empty
@@ -108,6 +134,11 @@ let allProducts = [];
 let currentFilter = "All";
 let selectedProductLine = "";
 
+const CART_STORAGE_KEY = "trimdrop_cart_v1";
+
+/** @type {{ key: string, name: string, price_numeric: number, price_display: string, qty: number }[]} */
+let cartLines = [];
+
 /* -----------------------------------------------------------------------------
    BOOT
    --------------------------------------------------------------------------- */
@@ -116,8 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initTickerXray();
   initFilters();
   initCategoryTiles();
+  initCartAndCheckout();
   initModal();
   initNavOrders();
+  loadPersistedCart();
   loadInventory();
 });
 
@@ -225,66 +258,128 @@ async function loadInventory() {
 
   const applyFallback = (msg) => {
     allProducts = normalizeRows(FALLBACK_PRODUCTS);
+    pruneCartAgainstCatalogue();
     if (hint) hint.textContent = msg;
     applyFilter();
   };
 
-  if (!SHEET_URL) {
-    applyFallback("Set SHEET_URL in app.js — showing fallback samples.");
+  if (!SHEET_URL || !SHEET_URL.trim()) {
+    applyFallback("Set SHEET_URL in app.js to your Published CSV URL — showing fallback samples.");
     return;
   }
 
   if (hint) hint.textContent = "Loading catalogue…";
 
   try {
-    const res = await fetch(SHEET_URL);
-    const csvText = await res.text();
+    const res = await fetch(SHEET_URL.trim(), { credentials: "omit", redirect: "follow" });
+    if (!res.ok) {
+      throw new Error(`CSV fetch HTTP ${res.status}`);
+    }
+    let csvText = await res.text();
+    if (csvText.charCodeAt(0) === 0xfeff) csvText = csvText.slice(1);
+    if (!csvText.trim()) throw new Error("Empty CSV body");
+
     const parsed = parseCSV(csvText).map(normalizeCsvRow).filter(isAvailableRow);
 
     if (parsed.length === 0) {
-      applyFallback("No rows marked available=yes — fallback samples.");
+      applyFallback(
+        "Sheet had no available rows (need available=yes and a name) — fallback samples."
+      );
       return;
     }
 
     allProducts = parsed;
+    pruneCartAgainstCatalogue();
     if (hint) {
-      hint.textContent =
-        parsed.length +
-        ` piece${parsed.length !== 1 ? "s" : ""} from your sheet.` +
-        "";
+      hint.textContent = `${parsed.length} piece${parsed.length !== 1 ? "s" : ""} from your sheet.`;
     }
     applyFilter();
   } catch (e) {
     console.warn("loadInventory", e);
-    applyFallback("Could not load CSV — publish the sheet / check SHEET_URL. Fallback samples.");
+    applyFallback(
+      "Could not load CSV (check publish link, CORS, or column headers) — fallback samples."
+    );
   }
 }
 
+function pickCell(row, keys) {
+  for (const key of keys) {
+    const k = key.toLowerCase().replace(/\s+/g, "_");
+    if (
+      row[k] !== undefined &&
+      row[k] !== null &&
+      String(row[k]).trim() !== ""
+    ) {
+      return String(row[k]).trim();
+    }
+  }
+  return "";
+}
+
 function normalizeCsvRow(row) {
+  const name =
+    pickCell(row, ["name", "product_name", "product", "item", "title", "piece"]) || "";
+
   let priceNum =
-    typeof row.price_numeric === "number"
+    typeof row.price_numeric === "number" && !Number.isNaN(row.price_numeric)
       ? row.price_numeric
-      : parseFloat(String(row.price_raw || "").replace(/[^\d.-]/g, "")) || 0;
+      : 0;
+
+  if (!priceNum) {
+    const raw = pickCell(row, ["price", "price_kes", "cost", "ksh", "amount"]).replace(/[^\d.-]/g, "");
+    const n = parseFloat(raw);
+    if (!Number.isNaN(n)) priceNum = n;
+  }
+
+  const oldPick = pickCell(row, ["old_price", "was", "compare_at", "compare_price", "msrp"]);
 
   let oldNum = row.old_price;
   if (oldNum === undefined && row.old_price_numeric !== undefined)
     oldNum = row.old_price_numeric;
   if (typeof oldNum === "string") oldNum = parseFloat(oldNum.replace(/[^\d.-]/g, "")) || 0;
   if (typeof oldNum !== "number") oldNum = parseFloat(oldNum) || 0;
+  if (oldPick) {
+    const o = parseFloat(oldPick.replace(/[^\d.-]/g, ""));
+    if (!Number.isNaN(o)) oldNum = o;
+  }
 
-  let badge = String(row.badge || "").toLowerCase().trim();
-  const featured = String(row.featured || "").toLowerCase().trim();
+  const category = pickCell(row, ["category", "type", "cat", "collection"]);
+  const image_url = pickCell(row, ["image_url", "image", "photo", "photo_url", "picture", "photo_link"]);
+  const sku = pickCell(row, ["sku", "sku_code", "id", "item_id", "product_id"]);
+
+  let availableRaw = "";
+  if (row.available !== undefined && row.available !== null && String(row.available).trim() !== "") {
+    availableRaw = String(row.available).trim();
+  }
+  if (!availableRaw)
+    availableRaw = pickCell(row, ["available", "in_stock", "stock", "active"]);
+  const available = availableRaw || "yes";
+
+  let badge = String(pickCell(row, ["badge", "tag", "label"]) || row.badge || "")
+    .toLowerCase()
+    .trim();
+
+  let featuredRaw = pickCell(row, ["featured", "is_featured", "feature"]);
+  if (!featuredRaw && row.featured !== undefined && row.featured !== null) {
+    featuredRaw = String(row.featured).trim();
+  }
+  const featured = String(featuredRaw).toLowerCase().trim();
+
+  let price_display = row.price_display ? String(row.price_display) : "";
+  if (!price_display && priceNum) price_display = formatKsh(priceNum);
+
   if (!badge && (featured === "yes" || featured === "true")) badge = "new";
 
   return {
-    name: String(row.name || "").trim(),
-    category: capitalizeWord(row.category || ""),
-    price_display: row.price_display || formatKsh(priceNum),
+    sku,
+    name,
+    category: capitalizeWord(category),
+    price_display: price_display || formatKsh(priceNum),
     price_numeric: priceNum,
     old_price_numeric: oldNum,
     badge,
-    image_url: String(row.image_url || "").trim(),
-    available: row.available !== undefined ? String(row.available) : "yes",
+    image_url,
+    available,
   };
 }
 
@@ -309,10 +404,29 @@ function formatKsh(n) {
   return "KSH " + Math.round(num).toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+function normalizeCsvHeader(cell) {
+  let s = String(cell ?? "").trim();
+  if (!s.length) return "";
+  if (s.charCodeAt(0) === 0xfeff) s = s.slice(1);
+  s = s.replace(/^"+|"+$/g, "");
+  return s.replace(/\s+/g, "_").toLowerCase();
+}
+
 function parseCSV(text) {
-  const lines = text.trim().split(/\n/).filter(Boolean);
+  let t = typeof text === "string" ? text : "";
+  if (!t.trim()) return [];
+  if (t.charCodeAt(0) === 0xfeff) t = t.slice(1);
+  t = t.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+
+  const rawLines = t.split("\n");
+  const lines = rawLines.map((ln) => ln.trim()).filter((ln) => ln.length > 0);
   if (!lines.length) return [];
-  const headers = splitCsvLine(lines[0]).map((h) => h.trim().replace(/"/g, "").toLowerCase());
+
+  const headers = splitCsvLine(lines[0]).map(normalizeCsvHeader).filter((h) => h.length > 0);
+  if (!headers.length) return [];
+
+  const PRICE_HEADERS = new Set(["price", "price_kes", "cost", "ksh", "amount"]);
+  const OLD_HEADERS = new Set(["old_price", "was", "compare_at", "compare_price", "msrp"]);
 
   return lines.slice(1).map((line) => {
     const vals = splitCsvLine(line);
@@ -324,15 +438,16 @@ function parseCSV(text) {
       if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
       row[h] = v;
 
-      if (h === "price") {
+      if (PRICE_HEADERS.has(h)) {
         const rawStr = String(v).replace(/[^\d.-]/g, "");
         const num = parseFloat(rawStr);
-        row.price_numeric = isNaN(num) ? 0 : num;
-        if (!isNaN(num) && rawStr !== "") {
-          row.price_display = "KSH " + Math.round(num).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        row.price_numeric = Number.isNaN(num) ? 0 : num;
+        if (!Number.isNaN(num) && rawStr !== "") {
+          row.price_display =
+            "KSH " + Math.round(num).toLocaleString(undefined, { maximumFractionDigits: 0 });
         }
       }
-      if (h === "old_price") {
+      if (OLD_HEADERS.has(h)) {
         const rawStr = String(v).replace(/[^\d.-]/g, "");
         row.old_price = parseFloat(rawStr) || 0;
       }
@@ -428,6 +543,16 @@ function applyFilter() {
       openOrderFromCard(quick);
     });
   });
+
+  grid.querySelectorAll(".product-add").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const key = btn.getAttribute("data-cart-key");
+      if (!key) return;
+      const p = findProductByKey(key);
+      if (p) addProductToCart(p);
+    });
+  });
 }
 
 function badgeHtml(badge) {
@@ -453,7 +578,24 @@ function escapeAttr(s) {
     .replace(/</g, "&lt;");
 }
 
+function productCartKey(p) {
+  const sku = String(p.sku || "").trim();
+  if (sku) return sku;
+  const slug = String(p.name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 120);
+  return `${slug}-${Number(p.price_numeric) || 0}`;
+}
+
+function findProductByKey(key) {
+  return allProducts.find((p) => productCartKey(p) === key);
+}
+
 function productCardHtml(p, index) {
+  const ck = escapeAttr(productCartKey(p));
   const img = (p.image_url || "").trim();
 
   /** Placeholder: first letter — avoid inline HTML that breaks XSS story */
@@ -488,6 +630,9 @@ function productCardHtml(p, index) {
       <div class="product-info">
         <div class="product-name">${escapeHtml(p.name)}</div>
         ${priceInner}
+        <button type="button" class="product-add" data-cart-key="${ck}" aria-label="Add ${escapeAttr(
+          p.name
+        )} to bag">Add to bag</button>
       </div>
     </article>
   `.trim();
@@ -587,7 +732,7 @@ function openOrder() {
   if (!modal) return;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+  refreshOverlayScrollLock();
 
   if (!selectedProductLine) {
     const line = document.getElementById("orderModalProduct");
@@ -603,9 +748,350 @@ function closeOrder() {
   if (!modal) return;
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
+  refreshOverlayScrollLock();
+}
+
+/* -----------------------------------------------------------------------------
+   Cart + Lipa Na M-PESA checkout
+   --------------------------------------------------------------------------- */
+
+function persistCart() {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartLines));
+  } catch (_) {
+    /** ignore quota / privacy mode */
+  }
+}
+
+function pruneCartAgainstCatalogue() {
+  const next = [];
+  for (const line of cartLines) {
+    const p = findProductByKey(line.key);
+    if (!p) continue;
+    next.push({
+      key: line.key,
+      name: p.name,
+      price_numeric: Number(p.price_numeric) || 0,
+      price_display: p.price_display || formatKsh(p.price_numeric),
+      qty: line.qty,
+    });
+  }
+  cartLines = next;
+  persistCart();
+  syncCartBadgeUI();
+  renderCartDrawer();
+}
+
+function loadPersistedCart() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return;
+    cartLines = parsed
+      .filter((x) => x && x.key && x.name)
+      .map((x) => ({
+        key: String(x.key),
+        name: String(x.name),
+        price_numeric: Number(x.price_numeric) || 0,
+        price_display: String(x.price_display || formatKsh(x.price_numeric)),
+        qty: Math.max(1, Math.min(99, Number(x.qty) || 1)),
+      }));
+  } catch (_) {
+    cartLines = [];
+  }
+  syncCartBadgeUI();
+  renderCartDrawer();
+}
+
+function cartLineTotal(line) {
+  return (Number(line.price_numeric) || 0) * (Number(line.qty) || 1);
+}
+
+function cartGrandTotal() {
+  return cartLines.reduce((sum, l) => sum + cartLineTotal(l), 0);
+}
+
+function cartItemCount() {
+  return cartLines.reduce((n, l) => n + (Number(l.qty) || 1), 0);
+}
+
+function syncCartBadgeUI() {
+  const badge = document.getElementById("cartCountBadge");
+  const n = cartItemCount();
+  if (!badge) return;
+  if (n < 1) {
+    badge.hidden = true;
+    badge.textContent = "";
+  } else {
+    badge.hidden = false;
+    badge.textContent = String(n);
+  }
+}
+
+function addProductToCart(p) {
+  const key = productCartKey(p);
+  const existing = cartLines.find((l) => l.key === key);
+  if (existing) {
+    existing.qty = Math.min(99, (existing.qty || 1) + 1);
+    existing.price_numeric = Number(p.price_numeric) || 0;
+    existing.price_display = p.price_display || formatKsh(p.price_numeric);
+    existing.name = p.name;
+  } else {
+    cartLines.push({
+      key,
+      name: p.name,
+      price_numeric: Number(p.price_numeric) || 0,
+      price_display: p.price_display || formatKsh(p.price_numeric),
+      qty: 1,
+    });
+  }
+  persistCart();
+  syncCartBadgeUI();
+  renderCartDrawer();
+}
+
+function refreshOverlayScrollLock() {
+  const orderOpen = document.getElementById("orderModal")?.classList.contains("open");
+  const payOpen = document.getElementById("checkoutModal")?.classList.contains("open");
+  const cartOpen =
+    document.getElementById("cartDrawerBackdrop")?.classList.contains("open") || false;
+  document.body.style.overflow = orderOpen || payOpen || cartOpen ? "hidden" : "";
+}
+
+function mpesaGroupedDigits(raw) {
+  const d = String(raw || "").replace(/\D/g, "");
+  return d.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+}
+
+function renderMpesaInstructions(totalNum) {
+  const stepsEl = document.getElementById("checkoutMpesaSteps");
+  const warnEl = document.getElementById("checkoutMpesaWarn");
+  if (!stepsEl) return;
+
+  const totalLabel = formatKsh(totalNum);
+  const mode = (MPESA_PAYMENT_MODE || "paybill").toLowerCase() === "till" ? "till" : "paybill";
+  let missing = "";
+
+  let html = "";
+  if (mode === "paybill") {
+    const pb = mpesaGroupedDigits(MPESA_PAYBILL_NUMBER);
+    const ac = (MPESA_ACCOUNT_NUMBER || "").trim();
+    if (!MPESA_PAYBILL_NUMBER.trim() || !ac) {
+      missing = "Add MPESA_PAYBILL_NUMBER and MPESA_ACCOUNT_NUMBER in app.js so customers see the right numbers.";
+    }
+    html = `
+      <ol class="mpesa-steps">
+        <li>Open M-PESA → <strong>Lipa na M-PESA</strong> → <strong>Pay Bill</strong>.</li>
+        <li>Business number: <strong>${escapeHtml(pb || "— configure in app.js —")}</strong></li>
+        <li>Account number: <strong>${escapeHtml(ac || "—")}</strong></li>
+        <li>Amount: <strong>${escapeHtml(totalLabel)}</strong> exactly (don’t round up or down).</li>
+        <li>Enter your M-PESA PIN → confirm → copy the SMS confirmation code below.</li>
+      </ol>
+      <p class="mpesa-merchant">${escapeHtml(mpesaMerchantLabel())}</p>
+    `;
+  } else {
+    const till = mpesaGroupedDigits(MPESA_TILL_NUMBER);
+    if (!MPESA_TILL_NUMBER.trim()) missing = "Add MPESA_TILL_NUMBER in app.js for Till checkout.";
+    html = `
+      <ol class="mpesa-steps">
+        <li>Open M-PESA → <strong>Lipa na M-PESA</strong> → <strong>Buy Goods and Services</strong>.</li>
+        <li>Till No.: <strong>${escapeHtml(till || "— configure in app.js —")}</strong></li>
+        <li>Amount: <strong>${escapeHtml(totalLabel)}</strong> exactly.</li>
+        <li>PIN → confirm → paste the M-PESA confirmation / transaction code below.</li>
+      </ol>
+      <p class="mpesa-merchant">${escapeHtml(mpesaMerchantLabel())}</p>
+    `;
+  }
+
+  stepsEl.innerHTML = html;
+  if (warnEl) {
+    warnEl.hidden = !missing;
+    warnEl.textContent = missing;
+  }
+}
+
+function buildCartWhatsAppBody(mpesaRef) {
+  const radio = document.querySelector('input[name="checkout-delivery"]:checked');
+  const method =
+    radio && radio.value === "bolt" ? BRAND_VOICE.boltName : BRAND_VOICE.pickupName;
+
+  const lines = cartLines
+    .map(
+      (l) =>
+        `• ${l.qty}× ${l.name} — ${l.price_display} each = ${formatKsh(cartLineTotal(l))}`
+    )
+    .join("\n");
+
+  return `${BRAND_VOICE.opener} ${BRAND_NAME}.
+
+${BRAND_VOICE.deliveryLead}: ${method}
+
+Order (bag):
+${lines}
+
+Total: ${formatKsh(cartGrandTotal())}
+
+M-PESA confirmation: ${mpesaRef}
+
+${BRAND_VOICE.outro}`;
+}
+
+function renderCartDrawer() {
+  const listEl = document.getElementById("cartLines");
+  const emptyEl = document.getElementById("cartEmpty");
+  const subEl = document.getElementById("cartSubtotal");
+  const btn = document.getElementById("cartCheckoutBtn");
+  if (!listEl || !emptyEl) return;
+
+  if (!cartLines.length) {
+    listEl.innerHTML = "";
+    emptyEl.hidden = false;
+    if (subEl) subEl.textContent = "";
+    if (btn) btn.disabled = true;
+    return;
+  }
+
+  emptyEl.hidden = true;
+  if (btn) btn.disabled = false;
+  if (subEl) subEl.textContent = `Total ${formatKsh(cartGrandTotal())}`;
+
+  listEl.innerHTML = cartLines
+    .map(
+      (l) => `
+    <div class="cart-line" data-key="${escapeAttr(l.key)}">
+      <div class="cart-line-main">
+        <div class="cart-line-name">${escapeHtml(l.name)}</div>
+        <div class="cart-line-meta">${escapeHtml(l.price_display)} each</div>
+      </div>
+      <div class="cart-line-actions">
+        <button type="button" class="cart-qty" data-act="dec" aria-label="Decrease">−</button>
+        <span class="cart-qty-val">${l.qty}</span>
+        <button type="button" class="cart-qty" data-act="inc" aria-label="Increase">+</button>
+        <button type="button" class="cart-remove" data-act="remove" aria-label="Remove">Remove</button>
+      </div>
+    </div>
+  `
+    )
+    .join("");
+}
+
+function openCartDrawer() {
+  document.getElementById("cartDrawerBackdrop")?.classList.add("open");
+  const d = document.getElementById("cartDrawer");
+  if (!d) return;
+  renderCartDrawer();
+  d.classList.add("open");
+  d.setAttribute("aria-hidden", "false");
+  document.getElementById("cartDrawerBackdrop")?.setAttribute("aria-hidden", "false");
+  document.getElementById("cartToggleBtn")?.setAttribute("aria-expanded", "true");
+  refreshOverlayScrollLock();
+}
+
+function closeCartDrawer() {
+  document.getElementById("cartDrawerBackdrop")?.classList.remove("open");
+  document.getElementById("cartDrawerBackdrop")?.setAttribute("aria-hidden", "true");
+  const d = document.getElementById("cartDrawer");
+  if (!d) return;
+  d.classList.remove("open");
+  d.setAttribute("aria-hidden", "true");
+  document.getElementById("cartToggleBtn")?.setAttribute("aria-expanded", "false");
+  refreshOverlayScrollLock();
+}
+
+function openCheckoutModal() {
+  const total = cartGrandTotal();
+  if (total <= 0 || !cartLines.length) return;
+
+  const m = document.getElementById("checkoutModal");
+  const totalStrip = document.getElementById("checkoutTotalStrip");
+  const refInput = document.getElementById("checkoutMpesaRef");
+  closeCartDrawer();
+  if (refInput) refInput.value = "";
+  if (totalStrip) {
+    totalStrip.textContent = `Pay exactly ${formatKsh(total)}`;
+  }
+  renderMpesaInstructions(total);
+  if (!m) return;
+  m.classList.add("open");
+  m.setAttribute("aria-hidden", "false");
+  refreshOverlayScrollLock();
+}
+
+function closeCheckoutModal() {
+  const m = document.getElementById("checkoutModal");
+  if (!m) return;
+  m.classList.remove("open");
+  m.setAttribute("aria-hidden", "true");
+  refreshOverlayScrollLock();
+}
+
+function initCartAndCheckout() {
+  document.getElementById("cartToggleBtn")?.addEventListener("click", () => {
+    const d = document.getElementById("cartDrawer");
+    if (d?.classList.contains("open")) closeCartDrawer();
+    else openCartDrawer();
+  });
+
+  document.getElementById("cartDrawerBackdrop")?.addEventListener("click", closeCartDrawer);
+  document.getElementById("cartDrawerClose")?.addEventListener("click", closeCartDrawer);
+
+  document.getElementById("cartLines")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    const lineEl = btn.closest(".cart-line");
+    const key = lineEl?.getAttribute("data-key");
+    if (!key) return;
+    const act = btn.getAttribute("data-act");
+    const line = cartLines.find((l) => l.key === key);
+    if (!line) return;
+
+    if (act === "inc") line.qty = Math.min(99, (line.qty || 1) + 1);
+    if (act === "dec") line.qty = Math.max(1, (line.qty || 1) - 1);
+    if (act === "remove") cartLines = cartLines.filter((l) => l.key !== key);
+
+    persistCart();
+    syncCartBadgeUI();
+    renderCartDrawer();
+  });
+
+  document.getElementById("cartCheckoutBtn")?.addEventListener("click", () => {
+    if (cartGrandTotal() <= 0) return;
+    openCheckoutModal();
+  });
+
+  document.getElementById("checkoutModalClose")?.addEventListener("click", closeCheckoutModal);
+  document.getElementById("checkoutModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "checkoutModal") closeCheckoutModal();
+  });
+
+  document.getElementById("checkoutWaBtn")?.addEventListener("click", () => {
+    const refInput = document.getElementById("checkoutMpesaRef");
+    const ref = (refInput?.value || "").trim();
+    if (ref.length < 4) {
+      refInput?.focus();
+      refInput?.classList.add("checkout-input--error");
+      return;
+    }
+    refInput?.classList.remove("checkout-input--error");
+    const url = waUrl(buildCartWhatsAppBody(ref));
+    window.open(url, "_blank", "noopener,noreferrer");
+  });
+
+  document.getElementById("checkoutMpesaRef")?.addEventListener("input", (e) => {
+    e.target.classList.remove("checkout-input--error");
+  });
 }
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeOrder();
+  if (e.key !== "Escape") return;
+  if (document.getElementById("checkoutModal")?.classList.contains("open")) {
+    closeCheckoutModal();
+    return;
+  }
+  if (document.getElementById("cartDrawerBackdrop")?.classList.contains("open")) {
+    closeCartDrawer();
+    return;
+  }
+  closeOrder();
 });
