@@ -9,7 +9,7 @@
        Each row: image_url = direct link to a product photo (same as sheet column).
 
    CONTACT
-     • WA_NUMBER — Your WhatsApp in international digits (no +), e.g. 2547…
+     • WA_NUMBER — Verified business line; do not replace with a placeholder (see below).
 
    PERSONALITY / BRAND VOICE (customer-facing tone)
      • BRAND_NAME + BRAND_VOICE — Used for WhatsApp prefill text. Edit the
@@ -31,8 +31,8 @@
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7o-SnNnXkzb9_xsCVbNvMi_-AGpTnsUa93E5ERc-xfs0oYXCckp0n-BiQo5eFdyW61y_U5vxqlOad/pub?gid=0&single=true&output=csv";
 
-/** WhatsApp digits only (no +). Example is placeholder — put your business line. */
-const WA_NUMBER = "254700000000";
+/** Owner’s WhatsApp (digits only, no +). DO NOT change or “reset” this — keep 254746881264. */
+const WA_NUMBER = "254746881264";
 
 /**
  * How you greet customers in the WhatsApp draft — this IS your “personality” online.

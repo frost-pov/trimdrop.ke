@@ -1,0 +1,11 @@
+---
+description: Do not revert WA_NUMBER in app.js without explicit owner request
+globs: "app.js"
+alwaysApply: true
+---
+
+# WhatsApp line (TrimDrop)
+
+`const WA_NUMBER` in `app.js` is **`254746881264`** — the owner’s production number.
+
+Do **not** replace it with placeholders like `254700000000` or revert it during unrelated edits unless the owner explicitly asks to change it.
