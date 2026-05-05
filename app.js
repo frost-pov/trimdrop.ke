@@ -24,10 +24,10 @@
  * Paste the full link; it must include output=csv (or single=true&output=csv).
  * Leave "" to use FALLBACK_PRODUCTS (common reason “CSV doesn’t work” on Vercel).
  */
-const SHEET_URL = "";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7o-SnNnXkzb9_xsCVbNvMi_-AGpTnsUa93E5ERc-xfs0oYXCckp0n-BiQo5eFdyW61y_U5vxqlOad/pubhtml?gid=0&single=true";
 
 /** WhatsApp digits only (no +). Example is placeholder — put your business line. */
-const WA_NUMBER = "254700000000";
+const WA_NUMBER = "254746881264";
 
 /**
  * How you greet customers in the WhatsApp draft — this IS your “personality” online.
