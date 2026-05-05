@@ -20,14 +20,19 @@
    ============================================================================= */
 
 /**
- * Google Sheet — File → Share → Publish to web → pick the sheet → CSV → Publish.
- * Paste the full link; it must include output=csv (or single=true&output=csv).
- * Leave "" to use FALLBACK_PRODUCTS (common reason “CSV doesn’t work” on Vercel).
+ * Google Sheet — File → Share → Publish to web → CSV → Publish, then paste the URL here.
+ *
+ * IMPORTANT: Link must export CSV (`…/pub?…output=csv`). Copying “Link” from the Publish
+ * dialog often yields `pubhtml` (a web preview) — that will NOT load the catalogue.
+ *
+ * Typical format:
+ * https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISH_ID/pub?gid=0&single=true&output=csv
  */
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7o-SnNnXkzb9_xsCVbNvMi_-AGpTnsUa93E5ERc-xfs0oYXCckp0n-BiQo5eFdyW61y_U5vxqlOad/pubhtml?gid=0&single=true";
+const SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7o-SnNnXkzb9_xsCVbNvMi_-AGpTnsUa93E5ERc-xfs0oYXCckp0n-BiQo5eFdyW61y_U5vxqlOad/pub?gid=0&single=true&output=csv";
 
 /** WhatsApp digits only (no +). Example is placeholder — put your business line. */
-const WA_NUMBER = "254746881264";
+const WA_NUMBER = "254700000000";
 
 /**
  * How you greet customers in the WhatsApp draft — this IS your “personality” online.
@@ -253,6 +258,26 @@ function initTickerXray() {
 /* -----------------------------------------------------------------------------
    Sheet + CSV
    --------------------------------------------------------------------------- */
+
+/** Turn common “published web” URLs into a CSV fetch URL (fixes pubhtml vs pub). */
+function resolveSheetCsvUrl(url) {
+  const t = String(url ?? "").trim();
+  if (!t) return "";
+  try {
+    const u = new URL(t);
+    if (!u.hostname.includes("google.com") || !u.pathname.includes("/spreadsheets/")) {
+      return t;
+    }
+    if (/\/pubhtml\/?$/i.test(u.pathname)) {
+      u.pathname = u.pathname.replace(/\/pubhtml\/?$/i, "/pub");
+    }
+    u.searchParams.set("output", "csv");
+    return u.href;
+  } catch {
+    return t;
+  }
+}
+
 async function loadInventory() {
   const hint = document.getElementById("productsHint");
 
@@ -263,7 +288,8 @@ async function loadInventory() {
     applyFilter();
   };
 
-  if (!SHEET_URL || !SHEET_URL.trim()) {
+  const resolved = resolveSheetCsvUrl(SHEET_URL);
+  if (!resolved) {
     applyFallback("Set SHEET_URL in app.js to your Published CSV URL — showing fallback samples.");
     return;
   }
@@ -271,7 +297,7 @@ async function loadInventory() {
   if (hint) hint.textContent = "Loading catalogue…";
 
   try {
-    const res = await fetch(SHEET_URL.trim(), { credentials: "omit", redirect: "follow" });
+    const res = await fetch(resolved, { credentials: "omit", redirect: "follow" });
     if (!res.ok) {
       throw new Error(`CSV fetch HTTP ${res.status}`);
     }
