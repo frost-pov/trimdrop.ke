@@ -43,11 +43,10 @@
    * Per-tile override: data-bg on <a.cat-item> (sets --cat-image) wins over these defaults.
    */
   --cat-tees: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778021536/FINAL_T-SHIRT_MOCKUP-TAHIROVIC_AHMED3_3de5cac9-fe9f-440e-9e79-2ecef02de7e7_g2r6hy.webp");
-  --cat-bottoms: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778022575/abel-nieves-wcJW915fVrU-unsplash_iovqqz.jpg");
-  --cat-outerwear: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778023033/1millikarat-YiOE3snurL0-unsplash_chbwjf.jpg");
-  /* Footwear — swap this URL anytime (no separate paste was preserved for cat-4). */
-  --cat-footwear: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778005490/suhas-hanjar-7VkZ7xW7Dps-unsplash_rwno8n.jpg");
-  --cat-accessories: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778007445/G_shock_gkatur.jpg");
+  --cat-bottoms: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778023033/1millikarat-YiOE3snurL0-unsplash_chbwjf.jpg");
+  --cat-outerwear: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778022575/abel-nieves-wcJW915fVrU-unsplash_iovqqz.jpg");
+  --cat-footwear: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778023842/ronit-singh-iLsuTcbQ47c-unsplash_zacoa7.jpg");
+  --cat-accessories: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778003716/christian-seymour-QzR2mX4FKxc-unsplash_wdkojq.jpg");
 }
 
 *,
