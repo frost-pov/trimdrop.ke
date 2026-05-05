@@ -3,8 +3,8 @@
 
    QUICK MAP (what to edit here)
    ---------------------------------------------------------------------------
-   IMAGES  — Set in :root under “Brand imagery” below (CSS variables).
-             Use full URLs to hosted JPG/PNG/WebP (e.g. CDN, Drive direct link).
+   IMAGES — Brand hero / campaigns in :root (--brand-*). Category mosaic: use
+             data-bg URLs on each tile in index.html, or --cat-* in tokens :root.
    MOOD    — Colours & type scale in the second :root block (tokens).
    LAYOUT  — Section padding via --section-y, --gutter; max width via --max.
              On-page copy lives in index.html; sheet + cart live in app.js.
@@ -39,8 +39,8 @@
   --max: 1440px;
 
   /*
-   * “Shop the drop” tiles — set to url("…") or url("/images/your-file.jpg").
-   * `none` keeps the gradient only. Photos get soft edge veils so they blend into the mosaic.
+   * “Shop the drop” tile photos — url("https://…") or url("/images/name.jpg"), or `none`.
+   * Per-tile override: use data-bg on <a.cat-item> in index.html (see categories comment).
    */
   --cat-tees: none;
   --cat-bottoms: none;
@@ -688,8 +688,10 @@ section {
    ---------------------------------------------------------------------------
    • Labels: index.html — .cat-name / .cat-count on each tile.
    • Links: tiles are <a> → opens #products + sets filter via app.js.
-   • Optional photos: tokens above (--cat-tees … --cat-accessories). Paths like
-       url("/images/dark_fit.jpg") work once files are deployed with the site.
+   • Photos (pick one):
+       (1) Easy: on each <a class="cat-item" data-bg="https://…jpg"> — app.js applies it.
+       (2) Global :root — set --cat-tees … --cat-accessories to url("…") or url("/images/file.jpg").
+       (3) Inline: style="--cat-image: url('https://…');" on that <a>.
    --------------------------------------------------------------------------- */
 .categories {
   background: var(--black);
@@ -751,7 +753,7 @@ a.cat-item:focus-visible .cat-bg {
   background-image:
     linear-gradient(180deg, rgba(8, 8, 8, 0.55) 0%, rgba(8, 8, 8, 0.1) 40%, rgba(8, 8, 8, 0.55) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.45) 0%, transparent 55%),
-    var(--cat-tees),
+    var(--cat-image, var(--cat-tees)),
     linear-gradient(135deg, #1a1a1a 0%, #2d1a1a 100%);
   background-size: cover;
   background-position: center;
@@ -762,7 +764,7 @@ a.cat-item:focus-visible .cat-bg {
   background-image:
     linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.4) 0%, transparent 52%),
-    var(--cat-bottoms),
+    var(--cat-image, var(--cat-bottoms)),
     linear-gradient(135deg, #1a1a1e 0%, #1a1a2d 100%);
   background-size: cover;
   background-position: center;
@@ -773,7 +775,7 @@ a.cat-item:focus-visible .cat-bg {
   background-image:
     linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
-    var(--cat-outerwear),
+    var(--cat-image, var(--cat-outerwear)),
     linear-gradient(135deg, #1a1e1a 0%, #1a2d1a 100%);
   background-size: cover;
   background-position: center;
@@ -784,7 +786,7 @@ a.cat-item:focus-visible .cat-bg {
   background-image:
     linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
-    var(--cat-footwear),
+    var(--cat-image, var(--cat-footwear)),
     linear-gradient(135deg, #1e1a1a 0%, #2d2a1a 100%);
   background-size: cover;
   background-position: center;
@@ -795,7 +797,7 @@ a.cat-item:focus-visible .cat-bg {
   background-image:
     linear-gradient(180deg, rgba(8, 8, 8, 0.5) 0%, rgba(8, 8, 8, 0.08) 42%, rgba(8, 8, 8, 0.5) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.35) 0%, transparent 50%),
-    var(--cat-accessories),
+    var(--cat-image, var(--cat-accessories)),
     linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 100%);
   background-size: cover;
   background-position: center;

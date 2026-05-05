@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTickerXray();
   initFilters();
   initCategoryTiles();
+  initCategoryTileBackgrounds();
   initCartAndCheckout();
   initModal();
   initNavOrders();
@@ -554,6 +555,16 @@ function initCategoryTiles() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       products.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     });
+  });
+}
+
+/** “Shop the drop” tile photos — set data-bg="https://…jpg" on each a.cat-item (see index.html). */
+function initCategoryTileBackgrounds() {
+  document.querySelectorAll("a.cat-item[data-bg]").forEach((link) => {
+    const raw = (link.getAttribute("data-bg") || "").trim();
+    if (!raw) return;
+    const quoted = raw.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    link.style.setProperty("--cat-image", `url("${quoted}")`);
   });
 }
 

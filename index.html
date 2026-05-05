@@ -152,8 +152,12 @@
 </section>
 
 <!-- ========== CATEGORIES (mosaic → New drops) ==========
-     CLICK: Each tile jumps to #products + selects that category filter (app.js).
-     PHOTOS: Optional — set --cat-tees … --cat-accessories in styles.css (:root).
+     CLICK: Tap a tile → jumps to New drops + that category filter (app.js).
+     PHOTOS ON TILES — add data-bg="https://your-cdn…/photo.jpg" on each <a class="cat-item…">
+       Example (Tees tile):
+       <a href="#products" class="cat-item cat-1" data-filter="Tees"
+          data-bg="https://example.com/category-tees.jpg" …>
+       Or set --cat-tees … --cat-accessories in styles.css (:root).
  -->
 <section class="categories" id="categories">
   <div class="section-head">
