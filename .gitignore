@@ -3,5 +3,7 @@
 Thumbs.db
 *.log
 
-# Cursor / IDE (optional — remove these lines if you want to sync workspace settings)
-.cursor/
+# Cursor — keep shared rules; ignore the rest of .cursor
+.cursor/**
+!.cursor/rules/
+!.cursor/rules/**

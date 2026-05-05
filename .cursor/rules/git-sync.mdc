@@ -1,0 +1,15 @@
+---
+description: After editing TrimDrop, commit and push to origin main
+globs: "**/*.{html,css,js,mdc,gitignore}"
+alwaysApply: true
+---
+
+# Git sync (trimdrop.ke)
+
+When you change files in this repo under `C:\Users\forst-pov\Desktop\trimdrop.ke` (or workspace root is this folder):
+
+1. Run `git status` in the project root.
+2. If there are changes: `git add -A`, then `git commit -m "<clear one-line message>"` describing what changed.
+3. Run `git push origin main` (or `git push -u origin main` on first push).
+
+Do not leave the working tree dirty with completed work unless the user asked to hold commits. If push fails (auth, no network), say what failed and what to run locally.
