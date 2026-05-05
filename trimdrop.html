@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  TRIMDROP.KE — trimdrop.html                                             ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  WHERE TO ADD IMAGES                                                     ║
+  ║    • Hero + editorial panels → styles.css :root (--brand-hero,           ║
+  ║      --brand-campaign-a, --brand-campaign-b).                            ║
+  ║    • Product photos → Google Sheet column "image_url" or image_url in      ║
+  ║      FALLBACK_PRODUCTS inside app.js.                                      ║
+  ║    • Category tile backgrounds (optional) → styles.css near              ║
+  ║      ".cat-1 .cat-bg" (commented examples).                               ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  WHERE TO ADD PERSONALITY (copy + brand voice)                             ║
+  ║    • Headlines, paragraphs, buttons, footer → edit this file              ║
+  ║      (each section below is labelled in a comment).                      ║
+  ║    • Ticker / marquee lines → the repeated <span> tags in .ticker-inner. ║
+  ║    • WhatsApp opener + tone → app.js (const BRAND_VOICE).                ║
+  ║    • Colour + typography mood → styles.css (:root colour + font imports).║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PERSONALITY: browser tab title + SEO -->
+  <title>TRIMDROP.KE — Nairobi Streetwear</title>
+  <!-- Fonts: display + condensed UI (unchanged brand pairing) -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!--
+  -----------------------------------------------------------------------------
+  Custom cursor — no images here; behaviour in app.js (initCursor).
+  -----------------------------------------------------------------------------
+-->
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+<!-- ========== NAV ==========
+     PERSONALITY: logo text, link labels, CTA label.
+ -->
+<nav>
+  <a href="#hero" class="nav-logo">TRIM<span>DROP</span>.KE</a>
+  <ul class="nav-links">
+    <li><a href="#editorial">Stories</a></li>
+    <li><a href="#categories">Shop</a></li>
+    <li><a href="#products">Drops</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#delivery">Delivery</a></li>
+  </ul>
+  <a href="#" class="nav-cta" id="navOrderBtn">Order Now</a>
+</nav>
+
+<!-- ========== HERO ==========
+     IMAGES:  Full-bleed background is CSS --brand-hero in styles.css (not inline here).
+     PERSONALITY: hero-label, hero-title text, hero-sub tagline, button labels.
+ -->
+<section class="hero" id="hero">
+  <div class="hero-media" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-label">Nairobi Streetwear — Est. 2024</div>
+    <h1 class="hero-title">
+      TRIM<br>
+      <span class="outline">DROP</span><span class="red">.</span>
+    </h1>
+    <p class="hero-sub">Online Exclusive · Nairobi Delivery · Fresh Drops</p>
+    <div class="hero-actions">
+      <a href="#categories" class="btn-primary">Shop Now</a>
+      <a href="#editorial" class="btn-ghost">The brand</a>
+    </div>
+  </div>
+  <a class="hero-scroll" href="#editorial">Scroll</a>
+</section>
+
+<!-- ========== TICKER ==========
+     PERSONALITY: repeating promo phrases — duplicate rows if you change length (must loop).
+ -->
+<div class="ticker" id="tickerStrip" aria-hidden="true">
+  <div class="ticker-shell" id="tickerShell">
+    <div class="ticker-base">
+      <div class="ticker-inner">
+    <!-- Repeat block twice — CSS animation translates -50% for seamless marquee -->
+    <span>Nairobi Streetwear</span><span class="dot">✦</span>
+    <span>Fresh Drops Weekly</span><span class="dot">✦</span>
+    <span>Online Exclusive</span><span class="dot">✦</span>
+    <span>Pickup Mtaani</span><span class="dot">✦</span>
+    <span>Bolt Doorstep</span><span class="dot">✦</span>
+    <span>Full Ownership</span><span class="dot">✦</span>
+    <span>Nairobi Streetwear</span><span class="dot">✦</span>
+    <span>Fresh Drops Weekly</span><span class="dot">✦</span>
+    <span>Online Exclusive</span><span class="dot">✦</span>
+    <span>Pickup Mtaani</span><span class="dot">✦</span>
+    <span>Bolt Doorstep</span><span class="dot">✦</span>
+    <span>Full Ownership</span><span class="dot">✦</span>
+    <span>Nairobi Streetwear</span><span class="dot">✦</span>
+    <span>Fresh Drops Weekly</span><span class="dot">✦</span>
+    <span>Online Exclusive</span><span class="dot">✦</span>
+    <span>Pickup Mtaani</span><span class="dot">✦</span>
+    <span>Bolt Doorstep</span><span class="dot">✦</span>
+    <span>Full Ownership</span><span class="dot">✦</span>
+    <span>Nairobi Streetwear</span><span class="dot">✦</span>
+    <span>Fresh Drops Weekly</span><span class="dot">✦</span>
+    <span>Online Exclusive</span><span class="dot">✦</span>
+    <span>Pickup Mtaani</span><span class="dot">✦</span>
+    <span>Bolt Doorstep</span><span class="dot">✦</span>
+    <span>Full Ownership</span><span class="dot">✦</span>
+      </div>
+    </div>
+    <!-- X-ray layer: clone of .ticker-inner is injected here by app.js (keeps your lines in one place) -->
+    <div class="ticker-xray" id="tickerXrayMount" aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- ========== EDITORIAL / CAMPAIGN STRIPS ==========
+     IMAGES:  Left & right panels use --brand-campaign-a / --brand-campaign-b in styles.css.
+     PERSONALITY: section-label, headlines, body copy, CTA text in each column.
+ -->
+<section id="editorial" class="editorial">
+  <article class="editorial-panel editorial-panel--a">
+    <div class="editorial-panel__visual editorial-panel__visual--a" role="presentation"></div>
+    <div class="editorial-panel__copy">
+      <p class="section-label">Campaign</p>
+      <h2 class="editorial-panel__title">Built for Nairobi streets.</h2>
+      <p class="editorial-panel__lede">
+        Full-bleed sections, room for your own photography — same energy as flagship sport sites, trimmed for TrimDrop.
+        Swap the visuals in <code>styles.css</code> (<code>--brand-campaign-a</code>).
+      </p>
+    </div>
+  </article>
+  <article class="editorial-panel editorial-panel--b">
+    <div class="editorial-panel__copy editorial-panel__copy--right">
+      <p class="section-label">Season</p>
+      <h2 class="editorial-panel__title">Every drop,<br>a statement.</h2>
+      <p class="editorial-panel__lede">
+        Inventory below can be driven by a Google Sheet — add rows to publish pieces, toggle availability to hide them.
+      </p>
+      <a href="#products" class="btn-primary editorial-panel__btn">View drops</a>
+    </div>
+    <div class="editorial-panel__visual editorial-panel__visual--b" role="presentation"></div>
+  </article>
+</section>
+
+<!-- ========== CATEGORIES (decorative mosaic) ==========
+     IMAGES:  Optional photo per tile — see styles.css (.cat-1 … .cat-5 .cat-bg).
+     PERSONALITY: cat-name + cat-count lines (how you describe each category).
+ -->
+<section class="categories" id="categories">
+  <div class="section-head">
+    <p class="section-label">Browse by Category</p>
+    <h2 class="section-title">Shop the drop</h2>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-item cat-1">
+      <div class="cat-bg"></div>
+      <div class="cat-arrow" aria-hidden="true">↗</div>
+      <div class="cat-info">
+        <div class="cat-name">Tees &amp; Tops</div>
+        <div class="cat-count">New arrivals</div>
+      </div>
+    </div>
+    <div class="cat-item cat-2">
+      <div class="cat-bg"></div>
+      <div class="cat-arrow" aria-hidden="true">↗</div>
+      <div class="cat-info">
+        <div class="cat-name">Bottoms</div>
+        <div class="cat-count">Joggers &amp; cargos</div>
+      </div>
+    </div>
+    <div class="cat-item cat-3">
+      <div class="cat-bg"></div>
+      <div class="cat-arrow" aria-hidden="true">↗</div>
+      <div class="cat-info">
+        <div class="cat-name">Outerwear</div>
+        <div class="cat-count">Hoodies &amp; jackets</div>
+      </div>
+    </div>
+    <div class="cat-item cat-4">
+      <div class="cat-bg"></div>
+      <div class="cat-arrow" aria-hidden="true">↗</div>
+      <div class="cat-info">
+        <div class="cat-name">Footwear</div>
+        <div class="cat-count">Kicks</div>
+      </div>
+    </div>
+    <div class="cat-item cat-5">
+      <div class="cat-bg"></div>
+      <div class="cat-arrow" aria-hidden="true">↗</div>
+      <div class="cat-info">
+        <div class="cat-name">Accessories</div>
+        <div class="cat-count">Caps &amp; bags</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRODUCTS ==========
+     IMAGES:  Each product’s photo → Google Sheet column image_url (see app.js).
+     PERSONALITY: section labels "Latest pieces" / "New drops"; empty-state text below grid.
+               (Product titles & prices come from the sheet / fallback list.)
+ -->
+<section class="products" id="products">
+  <div class="products-header">
+    <div>
+      <p class="section-label">Latest pieces</p>
+      <h2 class="section-title">New drops</h2>
+      <p class="products-hint" id="productsHint"></p>
+    </div>
+    <div class="filter-tabs" role="tablist" aria-label="Product categories">
+      <button type="button" class="filter-tab active" data-filter="All">All</button>
+      <button type="button" class="filter-tab" data-filter="Tees">Tees</button>
+      <button type="button" class="filter-tab" data-filter="Bottoms">Bottoms</button>
+      <button type="button" class="filter-tab" data-filter="Outerwear">Outerwear</button>
+      <button type="button" class="filter-tab" data-filter="Footwear">Footwear</button>
+      <button type="button" class="filter-tab" data-filter="Accessories">Accessories</button>
+    </div>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+  <p class="products-empty" id="productsEmpty" hidden>No pieces match this filter. Try another category.</p>
+</section>
+
+<!-- ========== HOW IT WORKS ==========
+     PERSONALITY: Four steps — edit titles + descriptions to match how YOU operate.
+ -->
+<section class="how" id="how">
+  <div class="section-head">
+    <p class="section-label">Simple process</p>
+    <h2 class="section-title">How it works</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Browse</div>
+      <p class="step-desc">Scroll the catalogue — stock syncs when you edit the spreadsheet.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Order</div>
+      <p class="step-desc">Tap “Order via WhatsApp” on any piece. You message us directly to confirm.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Pay</div>
+      <p class="step-desc">Pay via M-Pesa once your order is confirmed.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Receive</div>
+      <p class="step-desc">Pickup Mtaani or Bolt doorstep — we dispatch fast on confirmed orders.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== DELIVERY ==========
+     PERSONALITY: Option names, descriptions, tags — match your real logistics.
+ -->
+<section class="delivery" id="delivery">
+  <div class="section-head">
+    <p class="section-label">We come to you</p>
+    <h2 class="section-title">Delivery options</h2>
+  </div>
+  <div class="delivery-grid">
+    <div class="delivery-option">
+      <div class="delivery-name">Pickup Mtaani</div>
+      <p class="delivery-desc">Collect at your nearest Pickup Mtaani agent across Nairobi.</p>
+      <span class="delivery-tag">Nairobi wide</span>
+    </div>
+    <div class="delivery-option">
+      <div class="delivery-name">Bolt doorstep</div>
+      <p class="delivery-desc">Straight to your door via Bolt dispatch.</p>
+      <span class="delivery-tag">Doorstep</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA STRIP ==========
+     PERSONALITY: Big closing pitch + button label.
+ -->
+<section class="cta-section" aria-label="Order call to action">
+  <h2 class="section-title">Ready to drop?</h2>
+  <p>Browse the catalogue &amp; order in under two minutes.</p>
+  <a href="#" class="btn-white" id="ctaWaBtn">Order on WhatsApp</a>
+</section>
+
+<!-- ========== FOOTER ==========
+     PERSONALITY: Tagline, real social links (replace href="#"), city line.
+    IMAGES:    Optional — add <img> logos in a column here if you ever need them.
+ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">TRIM<span>DROP</span>.KE</div>
+      <div class="footer-tagline">Nairobi Streetwear — online exclusive</div>
+      <div class="footer-social">
+        <a href="#" class="social-link">ig</a>
+        <a href="#" class="social-link">wa</a>
+        <a href="#" class="social-link">tt</a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#products">New arrivals</a></li>
+        <li><a href="#categories">Categories</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Info</h4>
+      <ul>
+        <li><a href="#how">How to order</a></li>
+        <li><a href="#delivery">Delivery</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#" id="footerWaLink">WhatsApp</a></li>
+        <li><a href="#">Nairobi, Kenya</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 TRIMDROP.KE</div>
+    <a href="#" class="footer-wa" id="footerWaBtn">Order on WhatsApp</a>
+  </div>
+</footer>
+
+<!-- ========== ORDER MODAL ==========
+     PERSONALITY: modal title/sub, delivery option labels, primary button text.
+     LOGIC:     app.js builds WhatsApp text from BRAND_VOICE + chosen delivery + product.
+ -->
+<div class="order-modal" id="orderModal" aria-modal="true" role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="orderModalClose" aria-label="Close">✕</button>
+    <div class="modal-title" id="orderModalTitle">Place order</div>
+    <div class="modal-sub">Choose delivery — we’ll open WhatsApp with this prefilled.</div>
+    <p class="modal-product" id="orderModalProduct" hidden></p>
+    <div class="modal-options">
+      <label class="modal-option">
+        <input type="radio" name="delivery" value="pickup" checked>
+        <div>
+          <div class="modal-option-text">Pickup Mtaani</div>
+          <div class="modal-option-sub">Collect at nearest agent</div>
+        </div>
+      </label>
+      <label class="modal-option">
+        <input type="radio" name="delivery" value="bolt">
+        <div>
+          <div class="modal-option-text">Bolt doorstep</div>
+          <div class="modal-option-sub">Delivered to you</div>
+        </div>
+      </label>
+    </div>
+    <a href="#" class="modal-wa-btn" id="modalWaContinue" target="_blank" rel="noopener">
+      Continue on WhatsApp
+    </a>
+  </div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>

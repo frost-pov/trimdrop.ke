@@ -1,0 +1,1543 @@
+/* =============================================================================
+   TRIMDROP.KE — styles.css
+
+   QUICK MAP (what to edit here)
+   ---------------------------------------------------------------------------
+   IMAGES  — Set in :root under “Brand imagery” below (CSS variables).
+             Use full URLs to hosted JPG/PNG/WebP (e.g. CDN, Drive direct link).
+   MOOD    — Colours & type scale in the second :root block (tokens).
+   LAYOUT  — Section padding via --section-y, --gutter; max width via --max.
+
+   For on-page copy (headlines, stories), edit trimdrop.html instead.
+   For product photos + WhatsApp wording, see app.js.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Brand imagery — your URLs (do not delete; change only if swapping assets).
+   Extra “blend” into the page is handled in .hero-media / .editorial-panel__visual
+   via neutral black gradients on top — works with any photo colour.
+   --------------------------------------------------------------------------- */
+:root {
+  --brand-hero: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778003707/jr-korpa-_OQ8Jc7kBmA-unsplash_fwzhsi.jpg");
+  --brand-campaign-a: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778000667/faceless_yaw0nv.jpg");
+  --brand-campaign-b: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778005490/suhas-hanjar-7VkZ7xW7Dps-unsplash_rwno8n.jpg");
+}
+
+/* -----------------------------------------------------------------------------
+   Design tokens — “personality” of the visuals (colour + rhythm)
+   Tweak --red / --gold / --black to shift brand feel without touching HTML.
+   --------------------------------------------------------------------------- */
+:root {
+  --black: #080808;
+  --red: #c8102e;
+  --gold: #d4a017;
+  --white: #f0ede8;
+  --grey: #1a1a1a;
+  --mid: #2a2a2a;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --section-y: clamp(5rem, 12vw, 10rem);
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --max: 1440px;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: Barlow, system-ui, sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+/* -----------------------------------------------------------------------------
+   Cursor
+   --------------------------------------------------------------------------- */
+.cursor {
+  width: 12px;
+  height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease;
+  mix-blend-mode: difference;
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.35s ease, width 0.3s, height 0.3s;
+}
+
+/* -----------------------------------------------------------------------------
+   Nav
+   --------------------------------------------------------------------------- */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem var(--gutter);
+  background: linear-gradient(to bottom, rgba(8, 8, 8, 0.94), transparent 100%);
+  backdrop-filter: blur(8px);
+}
+
+.nav-logo {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.625rem;
+  letter-spacing: 0.28em;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav-logo span {
+  color: var(--red);
+}
+
+.nav-links {
+  display: flex;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+  opacity: 0.65;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.nav-links a:hover {
+  opacity: 1;
+  color: var(--gold);
+}
+
+.nav-cta {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: var(--red);
+  color: var(--white);
+  padding: 0.65rem 1.35rem;
+  text-decoration: none;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-cta:hover {
+  background: #a00020;
+}
+
+/* -----------------------------------------------------------------------------
+   Hero — optional full-bleed photo layer
+   --------------------------------------------------------------------------- */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  align-items: end;
+  padding: 8rem var(--gutter) calc(var(--section-y) * 1.25);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--black);
+}
+
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Page black under photo; semi-transparent black veils on top = smooth edge blend for any image colour */
+  background-color: var(--black);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 8, 0.94) 0%,
+      rgba(8, 8, 8, 0.5) 12%,
+      rgba(8, 8, 8, 0.08) 36%,
+      rgba(8, 8, 8, 0.1) 64%,
+      rgba(8, 8, 8, 0.55) 88%,
+      rgba(8, 8, 8, 0.96) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(8, 8, 8, 0.85) 0%,
+      rgba(8, 8, 8, 0.18) 14%,
+      rgba(8, 8, 8, 0.03) 50%,
+      rgba(8, 8, 8, 0.18) 86%,
+      rgba(8, 8, 8, 0.85) 100%
+    ),
+    var(--brand-hero);
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Soft depth + very light brand tint (does not fight arbitrary photo hues) */
+  background:
+    radial-gradient(ellipse 95% 75% at 50% 70%, transparent 32%, rgba(8, 8, 8, 0.5) 100%),
+    radial-gradient(ellipse at 72% 34%, rgba(200, 16, 46, 0.07) 0%, transparent 52%),
+    radial-gradient(ellipse at 24% 76%, rgba(212, 160, 23, 0.05) 0%, transparent 50%);
+}
+
+.hero-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+  background-size: min(72px, 12vw) min(72px, 12vw);
+  opacity: 0.8;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--max);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.85s var(--ease-out) both;
+}
+
+.hero-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(4rem, 16vw, 12.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  animation: fadeUp 0.85s 0.08s var(--ease-out) both;
+}
+
+.hero-title .outline {
+  -webkit-text-stroke: 1px rgba(240, 237, 232, 0.22);
+  color: transparent;
+}
+
+.hero-title .red {
+  color: var(--red);
+}
+
+.hero-sub {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.45);
+  margin-top: 2rem;
+  max-width: 36rem;
+  line-height: 1.65;
+  animation: fadeUp 0.85s 0.16s var(--ease-out) both;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+  margin-top: 3rem;
+  animation: fadeUp 0.85s 0.24s var(--ease-out) both;
+}
+
+.hero-scroll {
+  position: absolute;
+  right: var(--gutter);
+  bottom: calc(var(--section-y) * 0.85);
+  z-index: 2;
+  writing-mode: vertical-rl;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.625rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.32);
+  text-decoration: none;
+  transition: color 0.2s;
+  animation: fadeUp 1s 0.4s var(--ease-out) both;
+}
+
+.hero-scroll:hover {
+  color: rgba(240, 237, 232, 0.75);
+}
+
+.hero-scroll::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 4rem;
+  background: var(--gold);
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  background: var(--red);
+  color: var(--white);
+  padding: 1rem 2.25rem;
+  text-decoration: none;
+  transition: transform 0.25s var(--ease-out), background 0.2s;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background: #a00020;
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border: 1px solid rgba(240, 237, 232, 0.28);
+  color: var(--white);
+  padding: 1rem 2.25rem;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s, transform 0.25s var(--ease-out);
+  display: inline-block;
+}
+
+.btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.editorial-panel__btn {
+  margin-top: 2rem;
+  border: none;
+  cursor: pointer;
+}
+
+/* -----------------------------------------------------------------------------
+   Ticker — subtle base + X-ray hover (pointer + lagging ring = two spots)
+   JS: initTickerXray() clones .ticker-inner into #tickerXrayMount; don’t remove.
+   --------------------------------------------------------------------------- */
+.ticker {
+  background: linear-gradient(
+    180deg,
+    #030303 0%,
+    #0a0a0a 50%,
+    #030303 100%
+  );
+  border-block: 1px solid rgba(240, 237, 232, 0.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  padding: 0.65rem 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticker-shell {
+  position: relative;
+  overflow: hidden;
+  /* Mask centers (pixels, relative to shell) — app.js updates while hovered */
+  --mx1: -200px;
+  --my1: -200px;
+  --mx2: -200px;
+  --my2: -200px;
+}
+
+.ticker-base {
+  position: relative;
+  z-index: 1;
+}
+
+/* Duplicated strip: richer black + white type, revealed only through masks */
+.ticker-xray {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  background: #0e0e0e;
+  /*
+   * X-ray windows: wide horizontal ellipses so a few words stay readable,
+   * still smaller than the old full “ad bar” hotspots. Tweak sizes here only.
+   *   — pointer: larger   | ring trail: slightly tighter
+   */
+  -webkit-mask-image:
+    radial-gradient(ellipse 168px 52px at var(--mx1) var(--my1), #fff 94%, transparent 100%),
+    radial-gradient(ellipse 128px 44px at var(--mx2) var(--my2), #fff 94%, transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 168px 52px at var(--mx1) var(--my1), #fff 94%, transparent 100%),
+    radial-gradient(ellipse 128px 44px at var(--mx2) var(--my2), #fff 94%, transparent 100%);
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+
+.ticker#tickerStrip.ticker--hover .ticker-xray {
+  opacity: 1;
+}
+
+.ticker-inner {
+  display: inline-flex;
+  animation: ticker 48s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-inner {
+    animation: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+}
+
+.ticker-inner span {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  padding: 0 1.75rem;
+  color: rgba(240, 237, 232, 0.28);
+}
+
+.ticker-inner span.dot {
+  padding: 0 0.5rem;
+  font-size: 0.35rem;
+  letter-spacing: 0;
+  line-height: 1;
+  color: rgba(212, 160, 23, 0.28);
+}
+
+.ticker-inner--xray span {
+  color: #fff;
+}
+
+.ticker-inner--xray span.dot {
+  color: rgba(235, 220, 180, 0.95);
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Editorial strips
+   --------------------------------------------------------------------------- */
+.editorial {
+  background: var(--black);
+}
+
+.editorial-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.editorial-panel--b {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.editorial-panel__visual {
+  min-height: min(92vh, 820px);
+  position: relative;
+  background: var(--grey);
+}
+
+.editorial-panel__visual--a {
+  background-color: var(--black);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 8, 0.95) 0%,
+      rgba(8, 8, 8, 0.18) 14%,
+      transparent 42%,
+      transparent 68%,
+      rgba(8, 8, 8, 0.28) 88%,
+      rgba(8, 8, 8, 0.98) 100%
+    ),
+    linear-gradient(90deg, rgba(8, 8, 8, 0.65) 0%, rgba(8, 8, 8, 0.1) 30%, transparent 48%),
+    var(--brand-campaign-a);
+  background-size: cover;
+  background-position: center;
+}
+
+.editorial-panel__visual--b {
+  background-color: var(--black);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 8, 0.95) 0%,
+      rgba(8, 8, 8, 0.16) 12%,
+      transparent 42%,
+      transparent 68%,
+      rgba(8, 8, 8, 0.32) 90%,
+      rgba(8, 8, 8, 0.98) 100%
+    ),
+    linear-gradient(270deg, rgba(8, 8, 8, 0.65) 0%, rgba(8, 8, 8, 0.1) 30%, transparent 48%),
+    var(--brand-campaign-b);
+  background-size: cover;
+  background-position: center;
+}
+
+.editorial-panel__visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0.25) 0%,
+    transparent 38%,
+    transparent 62%,
+    rgba(8, 8, 8, 0.35) 100%
+  );
+  opacity: 0.85;
+}
+
+.editorial-panel__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--section-y) clamp(2rem, 8vw, 6rem);
+  max-width: 40rem;
+}
+
+.editorial-panel__copy--right {
+  margin-left: auto;
+}
+
+.editorial-panel__title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.75rem;
+  text-transform: uppercase;
+}
+
+.editorial-panel__lede {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  font-weight: 300;
+  color: rgba(240, 237, 232, 0.55);
+}
+
+/* -----------------------------------------------------------------------------
+   Section scaffold
+   --------------------------------------------------------------------------- */
+section {
+  padding: var(--section-y) var(--gutter);
+}
+
+.section-head {
+  max-width: var(--max);
+  margin: 0 auto clamp(3rem, 7vw, 5rem);
+}
+
+.section-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(3rem, 8vw, 5.75rem);
+  line-height: 0.94;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* -----------------------------------------------------------------------------
+   Categories  (mosaic under “Shop the drop”)
+   ---------------------------------------------------------------------------
+   TEXT LABELS — Edit in trimdrop.html: .cat-name and .cat-count per tile.
+
+   OPTIONAL PHOTOS PER TILE — Override gradients below, e.g.:
+     .cat-1 .cat-bg {
+       background-image: url("https://yoursite.com/tees.jpg");
+       background-size: cover;
+       background-position: center;
+     }
+   Keep the ::after overlays for subtle texture, or remove those rules if photos
+   should stay clean.
+   --------------------------------------------------------------------------- */
+.categories {
+  background: var(--black);
+}
+
+.categories .section-head {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+.categories .cat-grid {
+  margin-top: 0;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  max-width: var(--max);
+  margin: 0 auto;
+}
+
+.cat-item {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--grey);
+}
+
+.cat-item:first-child {
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.cat-bg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.65s var(--ease-out);
+}
+
+.cat-item:hover .cat-bg {
+  transform: scale(1.04);
+}
+
+.cat-1 .cat-bg {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1a1a 100%);
+}
+
+.cat-2 .cat-bg {
+  background: linear-gradient(135deg, #1a1a1e 0%, #1a1a2d 100%);
+}
+
+.cat-3 .cat-bg {
+  background: linear-gradient(135deg, #1a1e1a 0%, #1a2d1a 100%);
+}
+
+.cat-4 .cat-bg {
+  background: linear-gradient(135deg, #1e1a1a 0%, #2d2a1a 100%);
+}
+
+.cat-5 .cat-bg {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 100%);
+}
+
+.cat-1 .cat-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(200, 16, 46, 0.05) 20px,
+    rgba(200, 16, 46, 0.05) 21px
+  );
+}
+
+.cat-2 .cat-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(212, 160, 23, 0.08) 0%, transparent 72%);
+}
+
+.cat-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: clamp(2rem, 6vw, 3rem);
+  background: linear-gradient(to top, rgba(8, 8, 8, 0.92), transparent);
+}
+
+.cat-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(1.85rem, 3.5vw, 2rem);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.cat-count {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.82;
+}
+
+.cat-arrow {
+  position: absolute;
+  top: 1.65rem;
+  right: 1.65rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translate(4px, -4px);
+  transition: opacity 0.3s, transform 0.3s var(--ease-out);
+  pointer-events: none;
+}
+
+.cat-item:hover .cat-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* -----------------------------------------------------------------------------
+   Products
+   --------------------------------------------------------------------------- */
+.products {
+  background: var(--grey);
+}
+
+.products-header {
+  max-width: var(--max);
+  margin: 0 auto clamp(3rem, 6vw, 4.5rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+.products-hint {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: rgba(240, 237, 232, 0.45);
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.375rem;
+}
+
+.filter-tab {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.62rem 1.12rem;
+  border: 1px solid rgba(240, 237, 232, 0.12);
+  background: transparent;
+  color: rgba(240, 237, 232, 0.45);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.filter-tab.active,
+.filter-tab:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.products-grid {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+.products-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: rgba(240, 237, 232, 0.45);
+}
+
+.product-card {
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card.product-card--entered {
+  animation: fadeUp 0.75s var(--ease-out) both;
+}
+
+.product-card:hover .product-quick {
+  transform: translateY(0);
+}
+
+.product-card:hover .product-img-wrap img {
+  transform: scale(1.04);
+}
+
+.product-img-wrap {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--mid);
+  position: relative;
+}
+
+.product-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s var(--ease-out);
+}
+
+/* Gentle bleed into card black — works for any product photo colour */
+.product-img-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      165deg,
+      rgba(8, 8, 8, 0.18) 0%,
+      transparent 22%,
+      transparent 55%,
+      rgba(8, 8, 8, 0.35) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(8, 8, 8, 0.12) 0%,
+      transparent 15%,
+      transparent 85%,
+      rgba(8, 8, 8, 0.12) 100%
+    );
+}
+
+.product-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 12rem;
+  display: grid;
+  place-items: center;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2.75rem;
+  letter-spacing: 0.08em;
+  color: rgba(240, 237, 232, 0.08);
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--mid), #111);
+}
+
+.product-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.38rem 0.75rem;
+  background: var(--red);
+  color: var(--white);
+  z-index: 2;
+}
+
+.product-badge.gold {
+  background: var(--gold);
+  color: var(--black);
+}
+
+.product-quick {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background: var(--red);
+  color: var(--white);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 1rem;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transform: translateY(100%);
+  transition: transform 0.35s var(--ease-out);
+}
+
+.product-info {
+  padding: clamp(1.125rem, 3vw, 1.375rem);
+}
+
+.product-name {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+
+.product-price {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.45rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.product-price .old {
+  font-size: 0.85rem;
+  color: rgba(240, 237, 232, 0.28);
+  text-decoration: line-through;
+  margin-left: 0.5rem;
+  font-family: Barlow, sans-serif;
+}
+
+/* -----------------------------------------------------------------------------
+   How it works — giant watermark kept, more padding
+   --------------------------------------------------------------------------- */
+.how {
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+}
+
+.how::before {
+  content: "ORDER";
+  position: absolute;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: min(26vw, 22rem);
+  color: rgba(255, 255, 255, 0.02);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.06em;
+}
+
+.how .section-head {
+  position: relative;
+  z-index: 1;
+}
+
+.steps {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.step {
+  background: var(--grey);
+  padding: clamp(2.5rem, 6vw, 3.25rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.step::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 0;
+  background: var(--red);
+  transition: height 0.45s var(--ease-out);
+}
+
+.step:hover::before {
+  height: 100%;
+}
+
+.step-num {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(4rem, 8vw, 5.5rem);
+  line-height: 1;
+  color: rgba(240, 237, 232, 0.05);
+  margin-bottom: 1.25rem;
+}
+
+.step-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.875rem;
+  color: var(--white);
+}
+
+.step-desc {
+  font-size: 0.9rem;
+  line-height: 1.78;
+  color: rgba(240, 237, 232, 0.48);
+  font-weight: 300;
+}
+
+/* -----------------------------------------------------------------------------
+   Delivery + CTA
+   --------------------------------------------------------------------------- */
+.delivery-grid {
+  max-width: var(--max);
+  margin: clamp(3rem, 6vw, 4rem) auto 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.delivery-option {
+  background: var(--black);
+  padding: clamp(3rem, 7vw, 4rem) clamp(2.5rem, 6vw, 3rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.delivery-option:hover {
+  background: #0c0c0c;
+}
+
+.delivery-option::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transition: transform 0.45s var(--ease-out);
+}
+
+.delivery-option:hover::after {
+  transform: scaleX(1);
+}
+
+.delivery-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2.25rem, 4vw, 2.75rem);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: var(--white);
+}
+
+.delivery-desc {
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  color: rgba(240, 237, 232, 0.48);
+  font-weight: 300;
+  max-width: 36ch;
+}
+
+.delivery-tag {
+  display: inline-block;
+  margin-top: 1.75rem;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 0.45rem 1.1rem;
+}
+
+.cta-section {
+  background: var(--red);
+  padding: var(--section-y) var(--gutter);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 30px,
+    rgba(0, 0, 0, 0.05) 30px,
+    rgba(0, 0, 0, 0.05) 31px
+  );
+}
+
+.cta-section .section-title {
+  font-size: clamp(3rem, 9vw, 6.75rem);
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.75rem;
+}
+
+.cta-section p {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(0.82rem, 1.8vw, 1rem);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  position: relative;
+  z-index: 1;
+}
+
+.btn-white {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  background: var(--white);
+  color: var(--red);
+  padding: 1.1rem 2.85rem;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-white:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* -----------------------------------------------------------------------------
+   Footer
+   --------------------------------------------------------------------------- */
+footer {
+  background: #030303;
+  padding: clamp(4rem, 10vw, 5rem) var(--gutter) 2rem;
+}
+
+.footer-top {
+  max-width: var(--max);
+  margin: 0 auto clamp(3rem, 6vw, 4rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  padding-bottom: clamp(2.75rem, 6vw, 3.75rem);
+  border-bottom: 1px solid rgba(240, 237, 232, 0.08);
+}
+
+.footer-logo {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2.75rem, 6vw, 3.75rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.footer-logo span {
+  color: var(--red);
+}
+
+.footer-tagline {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240, 237, 232, 0.32);
+  margin-top: 0.75rem;
+}
+
+.footer-social {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.social-link {
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid rgba(240, 237, 232, 0.14);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: rgba(240, 237, 232, 0.45);
+  font-size: 0.85rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.social-link:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.footer-links h4 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.footer-links ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.footer-links a {
+  font-family: Barlow, sans-serif;
+  font-size: 0.875rem;
+  color: rgba(240, 237, 232, 0.38);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 300;
+}
+
+.footer-links a:hover {
+  color: var(--white);
+}
+
+.footer-bottom {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: rgba(240, 237, 232, 0.22);
+}
+
+.footer-wa {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.footer-wa:hover {
+  opacity: 0.7;
+}
+
+/* -----------------------------------------------------------------------------
+   Modal
+   --------------------------------------------------------------------------- */
+.order-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 8, 8, 0.96);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+}
+
+.order-modal.open {
+  display: flex;
+}
+
+.modal-box {
+  background: var(--grey);
+  width: 100%;
+  max-width: 30rem;
+  padding: clamp(3rem, 8vw, 3.75rem);
+  position: relative;
+  animation: modalIn 0.45s var(--ease-out) both;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.125rem;
+  right: 1.125rem;
+  background: none;
+  border: none;
+  color: rgba(240, 237, 232, 0.45);
+  font-size: 1.375rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--white);
+}
+
+.modal-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.modal-sub {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.75rem;
+}
+
+.modal-product {
+  font-size: 0.9rem;
+  color: rgba(240, 237, 232, 0.55);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.875rem;
+}
+
+.modal-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(240, 237, 232, 0.1);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.modal-option:hover {
+  border-color: var(--red);
+  background: rgba(200, 16, 46, 0.05);
+}
+
+.modal-option input[type="radio"] {
+  accent-color: var(--red);
+}
+
+.modal-option-text {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.modal-option-sub {
+  font-size: 0.72rem;
+  color: rgba(240, 237, 232, 0.38);
+  margin-top: 0.125rem;
+  font-family: Barlow, sans-serif;
+}
+
+.modal-wa-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  background: #25d366;
+  color: var(--white);
+  padding: 1.125rem;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-wa-btn:hover {
+  background: #1da851;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .products-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-tabs {
+    justify-content: flex-start;
+  }
+
+  .editorial-panel,
+  .editorial-panel--b {
+    grid-template-columns: 1fr;
+  }
+
+  .editorial-panel__visual {
+    min-height: 55vh;
+  }
+
+  /* stack copy under image when second panel flips DOM order visually */
+  .editorial-panel--b .editorial-panel__visual--b {
+    order: -1;
+  }
+
+  .editorial-panel--b .editorial-panel__copy--right {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 1rem 1.15rem;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  section {
+    padding: clamp(4rem, 14vw, 6rem) var(--gutter);
+  }
+
+  .hero {
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+    padding-bottom: 6rem;
+  }
+
+  .hero-scroll {
+    display: none;
+  }
+
+  .cat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cat-item:first-child {
+    grid-column: span 2;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .delivery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    cursor: auto;
+  }
+
+  .cursor,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  /* Native tap targets OK without custom cursor blocking */
+  .filter-tab,
+  .product-quick {
+    cursor: pointer;
+  }
+}

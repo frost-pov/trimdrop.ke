@@ -1,0 +1,7 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+# Cursor / IDE (optional — remove these lines if you want to sync workspace settings)
+.cursor/
