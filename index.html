@@ -344,6 +344,7 @@
 <div class="order-modal" id="orderModal" aria-modal="true" role="dialog" aria-labelledby="orderModalTitle" aria-hidden="true">
   <div class="modal-box">
     <button type="button" class="modal-close" id="orderModalClose" aria-label="Close">✕</button>
+    <div class="modal-scroll">
     <div class="modal-title" id="orderModalTitle">Lock your order</div>
     <div class="modal-sub">Pick how it moves — we’ll open WhatsApp so you can DM the details.</div>
     <p class="modal-product" id="orderModalProduct" hidden></p>
@@ -366,6 +367,7 @@
     <a href="#" class="modal-wa-btn" id="modalWaContinue" target="_blank" rel="noopener">
       Open WhatsApp
     </a>
+    </div>
   </div>
 </div>
 
@@ -388,11 +390,12 @@
 <div class="order-modal checkout-modal" id="checkoutModal" aria-modal="true" role="dialog" aria-labelledby="checkoutTitle" aria-hidden="true">
   <div class="modal-box modal-box--wide">
     <button type="button" class="modal-close" id="checkoutModalClose" aria-label="Close">✕</button>
+    <div class="modal-scroll modal-scroll--checkout">
     <div class="mpesa-head">
       <span class="mpesa-icon" aria-hidden="true"></span>
       <div>
         <div class="modal-title" id="checkoutTitle">Lipa Na M-PESA</div>
-        <div class="modal-sub">Pay on your phone, then DM us the proof</div>
+        <div class="modal-sub checkout-modal-sub">Pay on your phone, then DM us the proof</div>
       </div>
     </div>
     <p class="checkout-total-pill" id="checkoutTotalStrip"></p>
@@ -419,6 +422,7 @@
       </label>
     </div>
     <button type="button" class="modal-wa-btn" id="checkoutWaBtn">Send order + M-PESA proof on WhatsApp</button>
+    </div>
   </div>
 </div>
 

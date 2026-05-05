@@ -1497,9 +1497,71 @@ footer {
   line-height: 1.5;
 }
 
+.checkout-modal-sub {
+  margin-bottom: 1rem;
+}
+
+/* Scrollable modal bodies (mobile keyboards + long M-PESA copy) */
+.order-modal.open {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-inline: clamp(0.75rem, 3vw, var(--gutter));
+  padding-top: max(0.65rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.order-modal > .modal-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 30rem;
+  max-height: min(92dvh, calc(100svh - 2rem));
+  margin-inline: auto;
+  margin-block: auto;
+  padding: clamp(2.65rem, 9vw, 3.65rem) clamp(1rem, 3.75vw, 1.65rem)
+    clamp(1.05rem, 3.5vw, 1.5rem);
+}
+
+.checkout-modal.order-modal > .modal-box--wide {
+  max-width: 36rem;
+}
+
+.modal-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: 0.25rem;
+}
+
+.modal-scroll--checkout {
+  max-height: min(72dvh, calc(100dvh - 9rem));
+}
+
+@media (min-width: 600px) {
+  .modal-scroll--checkout {
+    max-height: none;
+  }
+}
+
 .cart-lines {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   padding: 0 clamp(1.25rem, 4vw, 1.75rem);
 }
 
@@ -1727,9 +1789,6 @@ footer {
   padding: var(--gutter);
 }
 
-.order-modal.open {
-  display: flex;
-}
 
 .modal-box {
   background: var(--grey);
