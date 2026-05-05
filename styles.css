@@ -750,7 +750,7 @@ a.cat-item:focus-visible .cat-bg {
 /* Layer order: blend veils → optional photo → base gradient (--cat-* may be none) */
 .cat-1 .cat-bg {
   background-color: #171212;
-  background-image:
+  background-image: url("https://res.cloudinary.com/dmmltr4nf/image/upload/v1778021536/FINAL_T-SHIRT_MOCKUP-TAHIROVIC_AHMED3_3de5cac9-fe9f-440e-9e79-2ecef02de7e7_g2r6hy.webp")
     linear-gradient(180deg, rgba(8, 8, 8, 0.55) 0%, rgba(8, 8, 8, 0.1) 40%, rgba(8, 8, 8, 0.55) 100%),
     linear-gradient(90deg, rgba(8, 8, 8, 0.45) 0%, transparent 55%),
     var(--cat-image, var(--cat-tees)),

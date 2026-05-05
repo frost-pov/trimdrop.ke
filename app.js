@@ -129,6 +129,10 @@ const FALLBACK_PRODUCTS = [
  * Google Sheet header row (column names can float; parser matches by header text):
  *   name, category, price, old_price, badge, image_url, available, featured, sku
  *
+ *   Product photo: put a plain https://… link in the cell (recommended: CDN e.g.
+ *   Cloudinary). An inserted “image” or =IMAGE(...) may show in Sheets but publish
+ *   as empty CSV — the site only sees text in the CSV export.
+ *
  *   category → must match a filter chip: Tees | Bottoms | Outerwear | Footwear | Accessories
  *   badge → new | hot | empty
  *   featured → optional yes/true (if badge blank, badge shows as New)
@@ -303,7 +307,11 @@ async function loadInventory() {
   if (hint) hint.textContent = "Loading catalogue…";
 
   try {
-    const res = await fetch(resolved, { credentials: "omit", redirect: "follow" });
+    const res = await fetch(resolved, {
+      credentials: "omit",
+      redirect: "follow",
+      cache: "no-store",
+    });
     if (!res.ok) {
       throw new Error(`CSV fetch HTTP ${res.status}`);
     }
@@ -363,6 +371,77 @@ function pickCell(row, keys) {
   return "";
 }
 
+/** First https? URL in a cell (handles messy paste, stray quotes, etc.) */
+function coerceImageUrl(raw) {
+  let s = String(raw ?? "").trim();
+  if (!s) return "";
+  s = s.replace(/\uFEFF/g, "");
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  const smart = s.replace(/[\u201C\u201D\u2018\u2019]/g, '"');
+  if (smart !== s) s = smart;
+
+  const m = s.match(/https?:\/\/[^\s"',)\]\u00A0]+/i);
+  if (m) s = m[0];
+  s = s.replace(/[)\].,;:]+$/g, "");
+
+  try {
+    const u = new URL(s);
+    if (!/^https?:$/i.test(u.protocol)) return "";
+    let href = u.href;
+
+    if (u.hostname.includes("drive.google.com")) {
+      const fileId = u.pathname.match(/\/file\/d\/([^/]+)/);
+      if (fileId) {
+        href = `https://drive.google.com/uc?export=view&id=${fileId[1]}`;
+      } else if (u.pathname.includes("/open")) {
+        const id = u.searchParams.get("id");
+        if (id) href = `https://drive.google.com/uc?export=view&id=${id}`;
+      }
+    }
+    return href;
+  } catch {
+    return "";
+  }
+}
+
+const IMAGE_HEADER_HINT = /(image|photo|pic|thumb|cover|hero|banner|cdn|asset|media|url|link)/i;
+
+function pickImageUrl(row) {
+  const primary = pickCell(row, [
+    "image_url",
+    "image",
+    "photo",
+    "photo_url",
+    "picture",
+    "photo_link",
+    "item_cover",
+    "item_cover_url",
+    "cover",
+    "cover_url",
+    "cover_image",
+    "thumbnail",
+    "thumb",
+    "thumb_url",
+    "product_image",
+    "main_image",
+    "hero_image",
+  ]);
+
+  let url = coerceImageUrl(primary);
+  if (url) return url;
+
+  for (const [k, val] of Object.entries(row)) {
+    if (!IMAGE_HEADER_HINT.test(k)) continue;
+    if (typeof val !== "string" || !val.trim()) continue;
+    if (/^price|^old_price|numeric|display|available|featured|badge|sku/i.test(k)) continue;
+    url = coerceImageUrl(val);
+    if (url) return url;
+  }
+  return "";
+}
+
 function normalizeCsvRow(row) {
   const name =
     pickCell(row, ["name", "product_name", "product", "item", "title", "piece"]) || "";
@@ -391,7 +470,7 @@ function normalizeCsvRow(row) {
   }
 
   const category = pickCell(row, ["category", "type", "cat", "collection"]);
-  const image_url = pickCell(row, ["image_url", "image", "photo", "photo_url", "picture", "photo_link"]);
+  const image_url = pickImageUrl(row);
   const sku = pickCell(row, ["sku", "sku_code", "id", "item_id", "product_id"]);
 
   let availableRaw = "";
