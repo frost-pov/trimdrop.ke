@@ -64,19 +64,19 @@ function mpesaMerchantLabel() {
 
 const BRAND_VOICE = {
   /** First line of the prefilled message */
-  opener: "Hi! I want to place an order with",
+  opener: "Hi — I’m trying to cop from",
 
   /** Label before Pickup vs Bolt (printed on its own line) */
-  deliveryLead: "Delivery preference",
+  deliveryLead: "How you want it",
 
   pickupName: "Pickup Mtaani",
-  boltName: "Bolt doorstep",
+  boltName: "Bolt / doorstep",
 
   /** Shown when someone orders from a specific product card */
   pieceLead: "Piece",
 
   /** Trailing sign-off (emoji or short line — your vibe) */
-  outro: "🔥",
+  outro: "🛍",
 };
 
 /**
@@ -666,7 +666,7 @@ function productCardHtml(p, index) {
       <div class="product-img-wrap">
         ${mediaHtml}
         ${badgeHtml(p.badge)}
-        <button type="button" class="product-quick" data-name="${escapeAttr(p.name)}">Order via WhatsApp</button>
+        <button type="button" class="product-quick" data-name="${escapeAttr(p.name)}">DM on WhatsApp</button>
       </div>
       <div class="product-info">
         <div class="product-name">${escapeHtml(p.name)}</div>
